@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ProfilingTarget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ProjectTarget>
+    <TargetProject>380e86a3-c8a8-45d0-9106-1e3a00e78a44</TargetProject>
+    <FriendlyName>jbe</FriendlyName>
+  </ProjectTarget>
+  <Reports>
+    <Report>
+      <Filename>C:\Users\r00t\jbe\jbe_20160622.vspx</Filename>
+    </Report>
+  </Reports>
+</ProfilingTarget>

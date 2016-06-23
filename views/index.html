@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Gingiel-Bordon Basestar</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="/node_modules/angular/angular.js"></script>
+    <script src="/node_modules/angular-resource/angular-resource.js"></script>
+    <script src="/node_modules/angular-aria/angular-aria.js"></script>
+    <script src="/node_modules/angular-animate/angular-animate.js"></script>
+    <script src="/node_modules/angular-material/angular-material.js"></script>
+    <script src="/javascripts/ng-app.js"></script>
+
+</head>
+
+<body ng-app="joebApp">
+
+    <div ng-controller="joebController">
+        <div layout="column" layout-fill>
+            <md-toolbar>
+                <div class="md-toolbar-tools">
+                    <span>Gingiel-Bordon Basestar</span>
+                    <!-- fill up the space between left and right area -->
+                    <span flex></span>
+                    <!-- 				<md-button> Right Bar Button </md-button> -->
+                </div>
+            </md-toolbar>
+        </div>
+        <md-content layout="row" layout-xs="column" layout-wrap layout-align="space-around" >
+            <md-card ng-controller="SwitchControl" flex-xs="100" flex="30">
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">Switches</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-content layout="column" layout-align=" end">
+                    <md-switch ng-repeat="switch in switches" ng-model="switch.state" ng-change="switch.$save()">
+                        {{switch.name}}
+                    </md-switch>
+                </md-card-content>
+            </md-card>
+            <md-card ng-controller="HvacControl" flex-xs="100" flex="30" >
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">Climate</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-content layout="column">
+                    <div flex>
+                        <span class="md-body-2">Temperature: a lot</span>
+                    </div>
+                    <div flex>
+                        <span class="md-body-2">Humidity: humid as fuck</span>
+                    </div>
+                </md-card-content>
+                <md-card-actions layout="column">
+                    <md-slider-container flex layout="row" layout-align="center center">
+                        <span flex="25" class="md-body-1">Setpoint</span>
+                        <md-slider flex="50" min="55" max="85" ng-model="hvacState.setpoint" aria-label="red" id="red-slider">
+                        </md-slider>
+                        <md-input-container flex="25">
+                            <input type="number" ng-model="hvacState.setpoint" aria-label="red" aria-controls="red-slider">
+                        </md-input-container>
+                    </md-slider-container>
+                    <md-input-container>
+                        <label>Mode</label>
+                        <md-select ng-model="hvacState.mode" ng-model-options="{trackBy: '$value.toString()'}"  md-on-close="hvacState.$save()">
+                            <md-option ng-repeat="theMode in hvacModes track by $index" value="{{theMode}}">
+                                {{theMode}}
+                            </md-option>
+                        </md-select>
+                    </md-input-container>
+                </md-card-actions>
+            </md-card>
+            <md-card flex-xs="100" flex="30">
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">Chores</span>
+                    </md-card-title-text>
+                </md-card-title>
+            </md-card>
+        </md-content>
+    </div>
+</body>
+
+</html>
