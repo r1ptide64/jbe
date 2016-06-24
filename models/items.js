@@ -49,22 +49,22 @@ var NumberSchema = mongoose.Schema({
 var NumberModel = mongoose.model('number', NumberSchema);
 
 var getDoc = function (id, model, self) {
-    //var doc, err;
+    var doc, err;
     model.findById(id, function (err, doc) {
         //console.log('in getDoc!');
         if (err) {
-            console.log('error: ' + err);
-            return;
+            self.emit('err', err);
         }
-        if (doc == null) {
+        else if (doc == null) {
             doc = new model({ _id: self.id, state: self._state });
             doc.save(function (err, product) {
                 if (err) {
-                    console.log('error: ' + err);
+                    self.emit('err', err);
                 }
                 else {
                     self.doc = product;
                     self.emit('docReady');
+                    return product;
                 }
             });
         }   
@@ -73,6 +73,7 @@ var getDoc = function (id, model, self) {
             self.doc = doc;
             self.state = doc.state;
             self.emit('docReady');
+            return doc;
             //self.get = function () { return self.doc; };
             //self.post = function (updates) { self.doc.set(updates); };
             //self.on('change', self.doc.set('state', newState));
@@ -87,73 +88,92 @@ var Item = function (name, id, initialState, model, mqttOptions, httpOptions) {
     EventEmitter.call(self);
     this.name = name;
     this.id = id;
-    var _state = initialState;
-    self.on('docReady', function () {
-        Object.defineProperty(this, 'state', {
-            get: function () { return _state; },
-            set: function (newVal) {
-                if (Object.is(_state, newVal)) return;
-                _state = newVal;
-                self.emit('command', newState);
-                if (Object.is(newVal, doc.state)) return;
-                doc.set('state', newVal);
-                doc.save();
-            }
+    this.state = initialState;
+    this.setState = function (newState, source) {
+        self.emit('update', newState, this.state, source);
+        if (Object.is(newState, this.state)) return;
+        self.emit('change', newState, this.state, source);
+        this.state = newState;
+    };
+    self.once('docReady', function () {
+        self.on('update', function (newState, oldState, source) {
+            if (source == 'db') return;
+            self.doc.state = newState;
+            self.doc.save(function (err) {
+                if (err) {
+                    self.emit('err', err);
+                }
+            });
         });
     });
-    getDoc(id, model, self);
+    this.doc = getDoc(id, model, self);
     if (mqttOptions.in) {
         client.subscribe(id, function (err) {
             if (err) {
-                console.log('MQTT error: ' + err);
+                self.emit('err', err);
             }
             else {
                 client.on('message', function (topic, message) {
                     if (topic.search(id) < 0) return;
-                    var newState = {};
-                    if (model == NumberModel) {
-                        newState = Number(message.toString());
-                    }
-                    else if (model == SwitchModel) {
-                        newState = (message.toString() == 'true');
-                    }
-                    self.emit('mqttIn', newState, self.state);
-                    self._state = newState;
+                    var newState = mqttOptions.in(message);
+                    self.setState(newState, 'mqtt');
                 });
             }
         });
     }
     if (mqttOptions.out) {
-        self.on('command', function (newState) {
-            client.publish(id + '/set', newState);
+        self.on('change', function (newState, oldState, source) {
+            if (source == 'mqtt') return;
+            client.publish(id + '/set', mqttOptions.out(newState));
         });
     }
 };
 util.inherits(Item, EventEmitter);
 
-var HvacSchema = mongoose.Schema({
-    _id: String,
-    mode: String,
-    setpoint: Number,
-    temperature: Number,
-    humidity: Number
-});
-var HvacModel = mongoose.model('hvac', HvacSchema);
-HvacModel.mqtt = {
-    in: {
-            temperature: '/temperature/temperature',
-            humidity: '/humidity/humidity'
+//var HvacSchema = mongoose.Schema({
+//    _id: String,
+//    mode: String,
+//    setpoint: Number,
+//    temperature: Number,
+//    humidity: Number
+//});
+//var HvacModel = mongoose.model('hvac', HvacSchema);
+//HvacModel.mqtt = {
+//    in: {
+//            temperature: '/temperature/temperature',
+//            humidity: '/humidity/humidity'
+//    },
+//    out: {}
+//};
+
+//var retTemp = new Item('Temperature', 'home/gf-therm/temperature/temperature', 0, NumberModel, { in: true });
+//var retSwitch = new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, { in: true });
+
+var backwardsSwitchMQTT = {
+    out: function (state) {
+        return (!state).toString();
     },
-    out: {}
+    in: function (message) {
+        return (message.toString() == 'false');
+    }
+};
+var forwardsSwitchMQTT = {
+    out: function (state) {
+        return (state).toString();
+    },
+    in: function (message) {
+        return (message.toString() == 'true');
+    }
 };
 
-var retTemp = new Item('Temperature', 'home/gf-therm/temperature/temperature', 0, NumberModel, { in: true });
-var retSwitch = new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, { in: true });
 
 module.exports = {
     switches: [
-        new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, { out: true }),
-        new Item('Porch Light', 'home/lf-bath/light/on', false, SwitchModel, { out: true }),
+        new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, backwardsSwitchMQTT),
+        new Item('Lower Bathroom Light', 'home/lf-bath/fan/on', false, SwitchModel, backwardsSwitchMQTT),
+        new Item('Lower Bathroom Fan', 'home/lf-bath/light/on', false, SwitchModel, forwardsSwitchMQTT),
     ],
+        //new Item('Lower Bathroom Light', 'home/lf-bath/fan/on', false, SwitchModel, { out: true, in: true }),
+        //new Item('Lower Bathroom Fan', 'home/lf-bath/light/on', false, SwitchModel, { out: true, in: true })
     hvac: []
 };

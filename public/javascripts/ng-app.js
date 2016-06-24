@@ -7,12 +7,12 @@ joebApp.config(function ($mdThemingProvider) {
 });
 
 joebApp.factory('Items', ['$resource', function ($resource) {
-        return $resource('/items/:id', { id: '@_id' });
+        return $resource('/items/:id', { id: '@id' });
     }]);
 
 
 joebApp.factory('HvacState', ['$resource', function ($resource) {
-        return $resource('/hvac');    
+        return $resource('/hvac/:id', { id: '@id' });    
     }]);
 
 joebApp.controller('SwitchControl', ['$scope', 'Items', function ($scope, Items) {
@@ -20,7 +20,7 @@ joebApp.controller('SwitchControl', ['$scope', 'Items', function ($scope, Items)
 }]);
 
 joebApp.controller('HvacControl', ['$scope', '$timeout', 'HvacState', function ($scope, $timeout, HvacState) {
-        $scope.hvacState = HvacState.get();
+        $scope.hvacState = HvacState.query();
         $scope.hvacModes = ["Off", "Heat", "AC"];
         var timeoutInstance;
         $scope.$watch('hvacState.setpoint', function (newVal, oldVal) {

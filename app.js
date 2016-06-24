@@ -29,11 +29,11 @@ var bodyParser = require('body-parser');
 //        console.log(doc);
 //    }
 //});
-var tester = require('./models/items.js');
-tester.on('mqttIn', function (newState) {
-    console.log('mqtt in! newstate below...');
-    console.log(newState);
-});
+//var tester = require('./models/items.js');
+//tester.on('mqttIn', function (newState) {
+//    console.log('mqtt in! newstate below...');
+//    console.log(newState);
+//});
 
 //var mqtt = require('mqtt');
 //var mongoose = require('mongoose');
@@ -46,7 +46,7 @@ tester.on('mqttIn', function (newState) {
 //    console.log('connected to database!');
 //});
 
-//var routes = require('./routes/index');
+var routes = require('./routes/index');
 //var users = require('./routes/users');
 
 //var tstAry = require('./models/test.js');
@@ -98,7 +98,24 @@ tester.on('mqttIn', function (newState) {
 //    }
 //});
 
+//var mySwitch = items.switches[0];
+//mySwitch.on('err', function (err) {
+//    console.log('error in app.js: ' + err);
+//});
+//mySwitch.on('update', function (newVal, oldVal, source) {
+//    console.log('update in app.js! newval: ' + newVal + ", oldval: " + oldVal + "  (from " + source + ")");
+//});
+//mySwitch.on('change', function (newVal, oldVal, source) {
+//    console.log('change in app.js! newval: ' + newVal + ", oldval: " + oldVal + "  (from " + source + ")");
+//});
 var app = express();
+app.items = require('./models/items.js');
+app.oneItem = function (id) {
+    function findItem(theItem) {
+        return theItem.id == id;
+    }
+    return app.items.switches.find(findItem);
+};
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -122,7 +139,7 @@ app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 //    next();
 //});
 
-//app.use('/', routes);
+app.use('/', routes);
 //app.use('/users', users);
 
 // catch 404 and forward to error handler
