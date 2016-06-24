@@ -6,6 +6,8 @@ joebApp.config(function ($mdThemingProvider) {
         .accentPalette('light-green');
 });
 
+joebApp.factory('socket', ['$rootScope', function ($rootScope) { }]);
+
 joebApp.factory('Items', ['$resource', function ($resource) {
         return $resource('/items/:id', { id: '@id' });
     }]);

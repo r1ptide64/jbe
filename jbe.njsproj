@@ -22,6 +22,7 @@
   <ItemGroup>
     <Content Include="package.json" />
     <Compile Include="app.js" />
+    <Compile Include="bin\www.js" />
     <Compile Include="models\hvac.js" />
     <Compile Include="models\items.js" />
     <Compile Include="models\switches.js" />
