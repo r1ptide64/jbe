@@ -56,7 +56,7 @@ var getDoc = function (id, model, self) {
             self.emit('err', err);
         }
         else if (doc == null) {
-            doc = new model({ _id: self.id, state: self._state });
+            doc = new model({ _id: self.id, state: self.state });
             doc.save(function (err, product) {
                 if (err) {
                     self.emit('err', err);
@@ -165,6 +165,12 @@ var forwardsSwitchMQTT = {
         return (message.toString() == 'true');
     }
 };
+var numberInMQTT = {
+    out: false,
+    in: function (message) {
+        return Number(message.toString());
+    }
+};
 
 
 module.exports = {
@@ -173,7 +179,12 @@ module.exports = {
         new Item('Lower Bathroom Light', 'home/lf-bath/fan/on', false, SwitchModel, backwardsSwitchMQTT),
         new Item('Lower Bathroom Fan', 'home/lf-bath/light/on', false, SwitchModel, forwardsSwitchMQTT),
     ],
-        //new Item('Lower Bathroom Light', 'home/lf-bath/fan/on', false, SwitchModel, { out: true, in: true }),
-        //new Item('Lower Bathroom Fan', 'home/lf-bath/light/on', false, SwitchModel, { out: true, in: true })
-    hvac: []
+    hvac: {
+        temp: new Item('Temperature', 'home/gf-therm/temperature/temperature', 1, NumberModel, numberInMQTT),
+        humid: new Item('Humidity', 'home/gf-therm/humidity/humidity', 1, NumberModel, numberInMQTT),
+        mode: new Item('Mode', 'mode', 0, NumberModel, { in: false, out: false }),
+        setpoint: new Item('Setpoint', 'setpoint', 65, NumberModel, { in: false, out: false }),
+        AC: new Item('AC', 'zzhome/gf-therm/AC/on', false, SwitchModel, forwardsSwitchMQTT),
+        heat: new Item('Heat', 'zzhome/gf-therm/heat/on', false, SwitchModel, forwardsSwitchMQTT)
+    }
 };
