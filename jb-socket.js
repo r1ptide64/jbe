@@ -1,4 +1,5 @@
 ﻿var app = require('./app.js');
+var debug = require('debug')('jbe:socket');
 var items = app.items;
 
 var item2cli = function (item) {
@@ -7,6 +8,17 @@ var item2cli = function (item) {
         state: item.state,
         name: item.name
     };
+};
+
+var getCliData = function () {
+    var ret = {};
+    Object.keys(items).forEach(function (itemType) {
+        ret[itemType] = {};
+        Object.keys(items[itemType]).forEach(function (itmIndx) {
+            ret[itemType][itmIndx] = item2cli(items[itemType][itmIndx]);
+        });
+    });
+    return ret;
 };
 
 var getHvacForCli = function (hvac) {
@@ -18,39 +30,84 @@ var getHvacForCli = function (hvac) {
 };
 
 var cli2item = function (slimItem) {
-    var fullAry = items.switches.concat(items.hvac);
     var findItem = function (oneItem) {
-        return oneItem.id == slimItem.id
+        return oneItem.id == slimItem.id;
     };
-    return fullAry.find(findItem);
+    for (var itemClass in items) {
+        //Object.keys(items).forEach(function (itemClass) {
+        for (var itmIndx in items[itemClass]) {
+        //Object.keys(items[itemClass]).forEach(function (itmIndx) {
+            var ret = items[itemClass][itmIndx];
+            if (findItem(ret)) return ret;
+        }
+    }
+    return undefined;
+    //var ret = items.switches.find(findItem);
+    //if (ret != undefined) return ret;
+    //for (var prop in items.hvac) {
+    //    ret = items.hvac[prop];
+    //    if (findItem(ret)) return ret;
+    //}
+    //return undefined;
 };
 
 var connected = function (socket) {
-    console.log('socket connection established!');
-    var cliData = {
-        switches: items.switches.map(item2cli),
-        hvac: getHvacForCli(items.hvac)
-    };
-    console.log('cliData:');
-    console.log(cliData);
+    debug('socket connection established! id: ' + socket.id);
+    var cliData = getCliData();
+    debug('cliData:');
+    debug(cliData);
     socket.emit('init', cliData);
     socket.on('command', function (slimItem) {
-        console.log('server received command! slimitem below:');
-        console.log(slimItem);
+        debug('server received command! slimitem below:');
+        debug(slimItem);
         var fullItem = cli2item(slimItem);
-        console.log('fullItem = ' + fullItem);
-        fullItem.setState(slimItem.state);
+        if (fullItem == undefined) {
+            debug("unable to find item: " + slimItem);
+            return;
+        }
+        debug('fullItem = ' + JSON.stringify(fullItem, null, '\t'));
+        fullItem.setState(slimItem.state, 'socket');
     });
     socket.on('disconnect', function () {
-        console.log('socket connection removed!');
+        debug('socket connection removed!');
     });
 };
 
 var retFn = function (server) {
     var io = require('socket.io')(server);
-
+    Object.keys(items).forEach(function (itemType) {
+        Object.keys(items[itemType]).forEach(function (itmIndx) {
+            var theItem = items[itemType][itmIndx];
+            theItem.on('change', function (newState, oldState, source) {
+                debug('got a change from ' + theItem.id + '! newState = ' + newState + ', oldState = ' + oldState);
+                io.emit('change', {
+                    id: theItem.id,
+                    state: newState
+                });
+            });
+        });
+    });
     io.on('connection', connected);
 };
+
+//    items.switches.forEach(function (theSwitch) {
+//        theSwitch.on
+//    });
+
+//    for (var prop in items.hvac) {
+//        var theItem = items.hvac[prop];
+//        theItem.on('change', function (newState, oldState, source) {
+//            //if (source == 'socket') return;
+//            debug('emitting change on prop ' + prop + ' (below)');
+//            debug(JSON.stringify(theItem, null, '\t'));
+//            io.emit('change', {
+//                id: theItem.id,
+//                state: newState
+//            });
+//        });
+//    }
+    
+//};
 
 
 

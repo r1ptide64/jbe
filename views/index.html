@@ -65,11 +65,11 @@
                         <md-divider></md-divider>
                         <md-list-item>
                             <p>Setpoint</p>
-                            <md-slider-container class="md-secondary">
-                                <md-slider flex min="55" max="85" ng-model="hvac.setpoint.state">
+                            <md-slider-container>
+                                <md-slider flex min="55" max="85" step="0.5" ng-model="hvac.setpoint.state" aria-label="red" id="red-slider">
                                 </md-slider>
                                 <md-input-container>
-                                    <input type="number" ng-model="hvac.setpoint.state">
+                                    <input flex="none" type="number" ng-model="hvac.setpoint.state" aria-label="red" aria-controls="red-slider">
                                 </md-input-container>
                             </md-slider-container>
                             <!--<md-slider-container flex layout="row" layout-align="center center">
@@ -83,10 +83,10 @@
                         </md-list-item>
                         <md-list-item>
                             <p>Mode<!--: <span class="radioValue">{{ hvacModes[hvac.mode.state] }}</span>--></p>
-                            <md-radio-group layout="row" ng-model="hvac.mode.state">
-                                <md-radio-button value="0">Off</md-radio-button>
-                                <md-radio-button value="1">Heat</md-radio-button>
-                                <md-radio-button value="2">AC</md-radio-button>
+                            <md-radio-group layout="row" ng-model="hvac.mode.state" ng-change="sendCommand(hvac.mode)">
+                                <md-radio-button ng-value=0>Off</md-radio-button>
+                                <md-radio-button ng-value=1>Heat</md-radio-button>
+                                <md-radio-button ng-value=2>AC</md-radio-button>
                             </md-radio-group>
                             <!--<md-radio-group ng-model="hvac.mode.state" ng-model-options="{trackBy: '$value.toString()'}" >
                                 <md-radio-button ng-repeat="theMode in hvacModes track by $index" value="{{theMode}}" ng-click="sendCommand(hvac.mode)">

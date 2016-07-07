@@ -1,15 +1,20 @@
 ﻿var util = require('util');
 var mqtt = require('mqtt');
 var mongoose = require('mongoose');
+var debug = require('debug')('jbe:items');
 
-mongoose.connect('mongodb://localhost/test');
+mongoose.connect('mongodb://127.0.0.1:27017/test');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
-    console.log('connected to database!');
+    debug('connected to database!');
 });
 
-var client = mqtt.connect('mqtt://192.168.1.200:1883');
+var mosquittoServers = {
+    laptop: 'mqtt://127.0.0.1:1883',
+    desktop: 'mqtt://192.168.1.200:1883'
+};
+var client = mqtt.connect(mosquittoServers.laptop); 
 client.on('error', function (error) {
     console.error('MQTT error: ' + error);
 });
@@ -25,7 +30,7 @@ client.on('error', function (error) {
 //            console.error(err);
 //        }
 //        else {
-//            console.log('subscribed to relevant MQTT topics!');
+//            debug('subscribed to relevant MQTT topics!');
 //        }
 //    });
 //});
@@ -38,26 +43,35 @@ client.on('error', function (error) {
 
 var SwitchSchema = mongoose.Schema({
     _id: String,
-    state: Boolean
+    state: Boolean,
+    lastChange: Date,
+    lastUpdate: Date
 });
 var SwitchModel = mongoose.model('switch', SwitchSchema);
 
 var NumberSchema = mongoose.Schema({
     _id: String,
-    state: Number
+    state: Number,
+    lastChange: Date,
+    lastUpdate: Date
 });
 var NumberModel = mongoose.model('number', NumberSchema);
 
 var getDoc = function (id, model, self) {
     var doc, err;
     model.findById(id, function (err, doc) {
-        //console.log('in getDoc!');
+        //debug('in getDoc!');
         if (err) {
             self.emit('err', err);
         }
         else if (doc == null) {
-            doc = new model({ _id: self.id, state: self.state });
-            doc.save(function (err, product) {
+            doc = new model({
+                _id: self.id,
+                state: self.state,
+                lastUpdate: self.lastUpdate,
+                lastChange: self.lastChange
+            });
+            doc.save(function saveDoc(err, product) {
                 if (err) {
                     self.emit('err', err);
                 }
@@ -69,9 +83,11 @@ var getDoc = function (id, model, self) {
             });
         }   
         else {
-            //console.log('doc =' + doc);
+            //debug('doc =' + doc);
             self.doc = doc;
             self.state = doc.state;
+            self.lastUpdate = doc.lastUpdate;
+            self.lastChange = doc.lastChange;
             self.emit('docReady');
             return doc;
             //self.get = function () { return self.doc; };
@@ -82,23 +98,35 @@ var getDoc = function (id, model, self) {
     });
 };
 
-var EventEmitter = require('events');
+const EventEmitter = require('events').EventEmitter;
 var Item = function (name, id, initialState, model, mqttOptions, httpOptions) {
     var self = this;
     EventEmitter.call(self);
     this.name = name;
     this.id = id;
     this.state = initialState;
+    var now = Date.now();
+    this.lastUpdate = now;
+    this.lastChange = now;
     this.setState = function (newState, source) {
-        self.emit('update', newState, this.state, source);
-        if (Object.is(newState, this.state)) return;
-        self.emit('change', newState, this.state, source);
+        var now = Date.now();
+        var oldState = this.state;
         this.state = newState;
+        this.lastUpdate = now;
+        self.emit('update', newState, oldState, source);
+        if (Object.is(newState, oldState)) return;
+        this.lastChange = now;
+        self.emit('change', newState, oldState, source);
     };
     self.once('docReady', function () {
         self.on('update', function (newState, oldState, source) {
-            if (source == 'db') return;
-            self.doc.state = newState;
+            if (source === 'db') return;
+            var now = Date.now();
+            self.doc.lastUpdate = now;
+            if (!Object.is(newState, oldState)) {
+                self.doc.lastChange = now;
+                self.doc.state = newState;
+            }
             self.doc.save(function (err) {
                 if (err) {
                     self.emit('err', err);
@@ -115,6 +143,7 @@ var Item = function (name, id, initialState, model, mqttOptions, httpOptions) {
             else {
                 client.on('message', function (topic, message) {
                     if (topic.search(id) < 0) return;
+                    debug('new MQTT update on this object: ' + JSON.stringify(self, null, '\t'));
                     var newState = mqttOptions.in(message);
                     self.setState(newState, 'mqtt');
                 });
@@ -122,11 +151,12 @@ var Item = function (name, id, initialState, model, mqttOptions, httpOptions) {
         });
     }
     if (mqttOptions.out) {
-        self.on('change', function (newState, oldState, source) {
+        self.on('update', function (newState, oldState, source) {
             if (source == 'mqtt') return;
             client.publish(id + '/set', mqttOptions.out(newState));
         });
     }
+
 };
 util.inherits(Item, EventEmitter);
 
@@ -157,6 +187,7 @@ var backwardsSwitchMQTT = {
         return (message.toString() == 'false');
     }
 };
+
 var forwardsSwitchMQTT = {
     out: function (state) {
         return (state).toString();
@@ -172,19 +203,95 @@ var numberInMQTT = {
     }
 };
 
-
-module.exports = {
-    switches: [
-        new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, backwardsSwitchMQTT),
-        new Item('Lower Bathroom Light', 'home/lf-bath/fan/on', false, SwitchModel, backwardsSwitchMQTT),
-        new Item('Lower Bathroom Fan', 'home/lf-bath/light/on', false, SwitchModel, forwardsSwitchMQTT),
-    ],
+var retObj =  {
+    switches: {
+        porchLight: new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, backwardsSwitchMQTT),
+        lfbrLight: new Item('Lower Bathroom Light', 'home/lf-bath/fan/on', false, SwitchModel, backwardsSwitchMQTT),
+        lfbrFan: new Item('Lower Bathroom Fan', 'home/lf-bath/light/on', false, SwitchModel, forwardsSwitchMQTT),
+    },
     hvac: {
-        temp: new Item('Temperature', 'home/gf-therm/temperature/temperature', 1, NumberModel, numberInMQTT),
-        humid: new Item('Humidity', 'home/gf-therm/humidity/humidity', 1, NumberModel, numberInMQTT),
+        temp: new Item('Temperature', 'test/gf-therm/temperature/temperature', 1, NumberModel, numberInMQTT),
+        humid: new Item('Humidity', 'test/gf-therm/humidity/humidity', 1, NumberModel, numberInMQTT),
         mode: new Item('Mode', 'mode', 0, NumberModel, { in: false, out: false }),
         setpoint: new Item('Setpoint', 'setpoint', 65, NumberModel, { in: false, out: false }),
-        AC: new Item('AC', 'zzhome/gf-therm/AC/on', false, SwitchModel, forwardsSwitchMQTT),
-        heat: new Item('Heat', 'zzhome/gf-therm/heat/on', false, SwitchModel, forwardsSwitchMQTT)
+        AC: new Item('AC', 'test/gf-therm/AC/on', false, SwitchModel, forwardsSwitchMQTT),
+        heat: new Item('Heat', 'test/gf-therm/heat/on', false, SwitchModel, forwardsSwitchMQTT),
+        blowing: new Item('Blowing', 'blowing', false, SwitchModel, { in: false, out: false })
     }
 };
+
+const MIN_CYCLE_LENGTH = 20;
+const TEMP_WINDOW = 1;
+
+var processTemperatureChange = function () {
+    var debug = require('debug')('jbe:tempChange');
+    var setpoint = retObj.hvac.setpoint.state;
+    var currTemp = retObj.hvac.temp.state;
+    var currMode = retObj.hvac.mode.state;
+    var blowing = retObj.hvac.blowing;
+    if (setpoint === undefined || currTemp === undefined) {
+        console.error('critical value undefined!');
+        return;
+    }
+    var diff = currTemp - setpoint;
+    debug('diff = ' + diff);
+    var desiredState = undefined;
+    if (currMode === undefined || currMode === 0) {  // off/uninitiated
+        debug('system off/uninitiated, done.');
+        desiredState = false;
+    }
+    if (Date.now() - blowing.lastChange >= MIN_CYCLE_LENGTH * 1000) {
+        if (diff <= -TEMP_WINDOW) {
+            debug('temp is low');
+            desiredState = (currMode === 1) // heat mode?
+                ? true                      // yes: on if temp is low
+                : false;                    // no: off if temp is low
+        }
+        else if (diff >= TEMP_WINDOW) {
+            debug('temp is high');
+            desiredState = (currMode === 1) // heat mode?
+                ? false                     // yes: off if temp is high
+                : true;                     // no: on if temp is high
+        }
+        else {
+            debug('temp is just right');
+        }
+    }
+    else {
+        debug('started/stopped blowing recently.');
+    }
+    if (desiredState === undefined) {
+        debug('no change necessary, exiting.');
+        return;
+    }
+    blowing.setState(desiredState, 'hvac');
+};
+
+retObj.hvac.temp.on('update', processTemperatureChange);
+retObj.hvac.setpoint.on('update', processTemperatureChange);
+retObj.hvac.mode.on('update', processTemperatureChange);
+
+retObj.hvac.blowing.on('update', function (newState) {
+    var debug = require('debug')('jbe:blowing');
+    var currMode = retObj.hvac.mode.state;
+    var ac = retObj.hvac.AC;
+    var heat = retObj.hvac.heat;
+    switch (currMode) {
+        case 1:
+            debug('heat mode, turning heat to ' + newState);
+            heat.setState(newState, 'hvac');
+            ac.setState(false, 'hvac');
+            break;
+        case 2:
+            debug('AC mode, turning AC to ' + newState);
+            ac.setState(newState, 'hvac');
+            heat.setState(false, 'hvac');
+            break;
+        default:
+            debug('turning everything off.');
+            ac.setState(false, 'hvac');
+            heat.setState(false, 'hvac');
+    }
+});
+
+module.exports = retObj;

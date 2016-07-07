@@ -4,12 +4,13 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var debug = require('debug')('jbe:app');
 //var mongoose = require('mongoose');
 //mongoose.connect('mongodb://localhost/test');
 //var db = mongoose.connection;
 //db.on('error', console.error.bind(console, 'connection error:'));
 //db.once('open', function () {
-//    console.log('connected to database!');
+//    debug('connected to database!');
 //});
 //var HvacSchema = mongoose.Schema({
 //    _id: Number,
@@ -23,16 +24,16 @@ var bodyParser = require('body-parser');
 
 //var query = HvacModel.findById(1);
 //query.exec(function (err, doc) {
-//    console.log('in test find by id!');
+//    debug('in test find by id!');
 //    if (!err) {
-//        console.log('got doc!');
-//        console.log(doc);
+//        debug('got doc!');
+//        debug(doc);
 //    }
 //});
 //var tester = require('./models/items.js');
 //tester.on('mqttIn', function (newState) {
-//    console.log('mqtt in! newstate below...');
-//    console.log(newState);
+//    debug('mqtt in! newstate below...');
+//    debug(newState);
 //});
 
 //var mqtt = require('mqtt');
@@ -43,7 +44,7 @@ var bodyParser = require('body-parser');
 //db.on('error', console.error.bind(console, 'connection error:'));
 
 //db.once('open', function () {
-//    console.log('connected to database!');
+//    debug('connected to database!');
 //});
 
 var routes = require('./routes/index');
@@ -65,7 +66,7 @@ var routes = require('./routes/index');
 //            console.error(err);
 //        }
 //        else {
-//            console.log('subscribed to relevant MQTT topics!');
+//            debug('subscribed to relevant MQTT topics!');
 //        }
 //    });
 //});
@@ -88,34 +89,30 @@ var routes = require('./routes/index');
 //};
 
 //client.on('message', function (topic, message) {
-//    console.log('got message on topic ' + topic);
+//    debug('got message on topic ' + topic);
 //    if (topic.search("temperature") >= 0) {
 //        var rawTmp = Number(message.toString());
 //        if (!isNaN(rawTmp)) {
 //            averager.push(rawTmp);
-//            console.log(averager.val);
+//            debug(averager.val);
 //        }
 //    }
 //});
 
 //var mySwitch = items.switches[0];
 //mySwitch.on('err', function (err) {
-//    console.log('error in app.js: ' + err);
+//    debug('error in app.js: ' + err);
 //});
 //mySwitch.on('update', function (newVal, oldVal, source) {
-//    console.log('update in app.js! newval: ' + newVal + ", oldval: " + oldVal + "  (from " + source + ")");
+//    debug('update in app.js! newval: ' + newVal + ", oldval: " + oldVal + "  (from " + source + ")");
 //});
 //mySwitch.on('change', function (newVal, oldVal, source) {
-//    console.log('change in app.js! newval: ' + newVal + ", oldval: " + oldVal + "  (from " + source + ")");
+//    debug('change in app.js! newval: ' + newVal + ", oldval: " + oldVal + "  (from " + source + ")");
 //});
 var app = express();
 app.items = require('./models/items.js');
-app.oneItem = function (id) {
-    function findItem(theItem) {
-        return theItem.id == id;
-    }
-    return app.items.switches.find(findItem);
-};
+debug('app.items = ' + JSON.stringify(app.items, null, '\t'));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -134,8 +131,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
 //app.use('/', function (req, res, next) {
-//    console.log('request to root!');
-//    console.log(tester.doc);
+//    debug('request to root!');
+//    debug(tester.doc);
 //    next();
 //});
 

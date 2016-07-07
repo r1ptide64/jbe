@@ -21,6 +21,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 app.io = require('../jb-socket')(server);
+require('../suntime');
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -16,6 +16,7 @@
     <NodejsPort>3000</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
     <Name>jbe</Name>
+    <Environment>DEBUG=jbe:*</Environment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -24,6 +25,7 @@
     <Compile Include="app.js" />
     <Compile Include="bin\www.js" />
     <Compile Include="jb-socket.js" />
+    <Compile Include="suntime.js" />
     <Compile Include="models\hvac.js" />
     <Compile Include="models\items.js" />
     <Compile Include="models\switches.js" />
