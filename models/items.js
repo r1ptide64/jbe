@@ -3,10 +3,24 @@ var mqtt = require('mqtt');
 var mongoose = require('mongoose');
 var debug = require('debug')('jbe:items');
 
-mongoose.connect('mongodb://127.0.0.1:27017/test');
+var connectToDB = function () {
+    mongoose.connect('mongodb://127.0.0.1:27017/test');
+}
+connectToDB();
+var RECONNECT_PERIOD = 1000*10;
 var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+var reconnect = undefined;
+db.on('error', function (error) {
+    console.error('connection error: ' + error);
+    if (!Object.is(reconnect, undefined)) {
+        clearInterval(reconnect);
+    }
+    reconnect = setInterval(connectToDB, RECONNECT_PERIOD);
+});
 db.once('open', function () {
+    if (!Object.is(reconnect, undefined)) {
+        clearInterval(reconnect);
+    }
     debug('connected to database!');
 });
 
@@ -14,7 +28,7 @@ var mosquittoServers = {
     laptop: 'mqtt://127.0.0.1:1883',
     desktop: 'mqtt://192.168.1.200:1883'
 };
-var client = mqtt.connect(mosquittoServers.laptop); 
+var client = mqtt.connect(mosquittoServers.desktop);
 client.on('error', function (error) {
     console.error('MQTT error: ' + error);
 });
@@ -203,6 +217,13 @@ var numberInMQTT = {
     }
 };
 
+var presenceInMQTT = {
+    out: false,
+    in: function (message) {
+
+    }
+};
+
 var retObj =  {
     switches: {
         porchLight: new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, backwardsSwitchMQTT),
@@ -210,17 +231,20 @@ var retObj =  {
         lfbrFan: new Item('Lower Bathroom Fan', 'home/lf-bath/light/on', false, SwitchModel, forwardsSwitchMQTT),
     },
     hvac: {
-        temp: new Item('Temperature', 'test/gf-therm/temperature/temperature', 1, NumberModel, numberInMQTT),
-        humid: new Item('Humidity', 'test/gf-therm/humidity/humidity', 1, NumberModel, numberInMQTT),
+        temp: new Item('Temperature', 'home/gf-therm/temperature/temperature', 1, NumberModel, numberInMQTT),
+        humid: new Item('Humidity', 'home/gf-therm/humidity/humidity', 1, NumberModel, numberInMQTT),
         mode: new Item('Mode', 'mode', 0, NumberModel, { in: false, out: false }),
         setpoint: new Item('Setpoint', 'setpoint', 65, NumberModel, { in: false, out: false }),
-        AC: new Item('AC', 'test/gf-therm/AC/on', false, SwitchModel, forwardsSwitchMQTT),
-        heat: new Item('Heat', 'test/gf-therm/heat/on', false, SwitchModel, forwardsSwitchMQTT),
+        AC: new Item('AC', 'home/gf-therm/AC/on', false, SwitchModel, forwardsSwitchMQTT),
+        heat: new Item('Heat', 'home/gf-therm/heat/on', false, SwitchModel, forwardsSwitchMQTT),
         blowing: new Item('Blowing', 'blowing', false, SwitchModel, { in: false, out: false })
+    },
+    cc: {
+
     }
 };
 
-const MIN_CYCLE_LENGTH = 20;
+const MIN_CYCLE_LENGTH = 20*1000;
 const TEMP_WINDOW = 1;
 
 var processTemperatureChange = function () {
@@ -240,18 +264,14 @@ var processTemperatureChange = function () {
         debug('system off/uninitiated, done.');
         desiredState = false;
     }
-    if (Date.now() - blowing.lastChange >= MIN_CYCLE_LENGTH * 1000) {
+    if (Date.now() - blowing.lastChange >= MIN_CYCLE_LENGTH) {
         if (diff <= -TEMP_WINDOW) {
             debug('temp is low');
-            desiredState = (currMode === 1) // heat mode?
-                ? true                      // yes: on if temp is low
-                : false;                    // no: off if temp is low
+            desiredState = (currMode === 1); // heat mode?
         }
         else if (diff >= TEMP_WINDOW) {
             debug('temp is high');
-            desiredState = (currMode === 1) // heat mode?
-                ? false                     // yes: off if temp is high
-                : true;                     // no: on if temp is high
+            desiredState = (currMode !== 1); // heat mode?
         }
         else {
             debug('temp is just right');
@@ -292,6 +312,20 @@ retObj.hvac.blowing.on('update', function (newState) {
             ac.setState(false, 'hvac');
             heat.setState(false, 'hvac');
     }
+});
+
+var fanTimer = undefined;
+const FAN_TIMEOUT = 1000 * 60 * 20;
+
+retObj.switches.lfbrFan.on('change', function (newState) {
+    debug('lfbr fan changed');
+    if (newState === false) return;
+    debug('lfbr fan turned on');
+    if (!Object.is(fanTimer, undefined)) {
+        clearTimeout(fanTimer);
+        debug('timeout cleared');
+    }
+    fanTimer = setTimeout(retObj.switches.lfbrFan.setState.bind(retObj.switches.lfbrFan, false, 'timer'), FAN_TIMEOUT);
 });
 
 module.exports = retObj;

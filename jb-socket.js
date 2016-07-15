@@ -79,7 +79,7 @@ var retFn = function (server) {
         Object.keys(items[itemType]).forEach(function (itmIndx) {
             var theItem = items[itemType][itmIndx];
             theItem.on('change', function (newState, oldState, source) {
-                debug('got a change from ' + theItem.id + '! newState = ' + newState + ', oldState = ' + oldState);
+                debug('got a change from ' + source + ' on ' + theItem.id + '! newState = ' + newState + ', oldState = ' + oldState);
                 io.emit('change', {
                     id: theItem.id,
                     state: newState

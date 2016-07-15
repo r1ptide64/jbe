@@ -30,60 +30,27 @@ joebApp.factory('socket', ['$rootScope', function ($rootScope) {
     };
 }]);
 
-joebApp.factory('Items', ['$resource', function ($resource) {
-    return $resource('/items/:id', { id: '@id' });
-}]);
-
-
-joebApp.factory('HvacState', ['$resource', function ($resource) {
-    return $resource('/hvac/:id', { id: '@id' });
-}]);
-
-joebApp.controller('SwitchControl', ['$scope', 'Items', 'socket', function ($scope, Items, socket) {
-    //$scope.switches = Items.query();
-
-}]);
-
-joebApp.controller('HvacControl', ['$scope', '$timeout', 'HvacState', 'socket', function ($scope, $timeout, HvacState, socket) {
-    $scope.hvacState = HvacState.query();
-    $scope.hvacModes = ["Off", "Heat", "AC"];
-}]);
-
 joebApp.controller("joebController", ['$scope', '$timeout', 'socket', function ($scope, $timeout, socket) {
     var cli2item = function (slimItem) {
         console.log('cli2item, slimitem = ' + JSON.stringify(slimItem));
         function findItem(oneItem) {
             return oneItem.id == slimItem.id;
         };
-        for (var itmIndx in $scope.hvac) {
-            console.log('itmIndx = ' + itmIndx);
-            var ret = $scope.hvac[itmIndx];
-            if (findItem(ret)) return ret;
-        };
-        for (var itmIndx in $scope.switches) {
-            console.log('itmIndx = ' + itmIndx);
-            var ret = $scope.switches[itmIndx];
-            if (findItem(ret)) return ret;
-        };
+        for (var itmClass in $scope.cliData) {
+            for (var itmIndx in $scope.cliData[itmClass]) {
+                var ret = $scope.cliData[itmClass][itmIndx];
+                if (findItem(ret)) return ret;
+            }
+        }
         return undefined;
-        //var ret = $scope.switches.find(findItem);
-        //if (ret != undefined) return ret;
-        //for (var prop in $scope.hvac) {
-        //    ret = $scope.hvac[prop];
-        //    if (findItem(ret)) return ret;
-        //}
-        //return undefined;
     };
-    $scope.jbtest = "bacon";
     $scope.socket = socket;
     socket.on('init', function (cliData) {
         console.log(cliData);
-        $scope.switches = cliData.switches;
-        $scope.hvac = cliData.hvac;
-        $scope.jbtest = "received update after init event!";
+        $scope.cliData = cliData;
         var timeoutInstance;
-        $scope.$watch('hvac.setpoint.state', function (newVal, oldVal) {
-            if (isNaN(newVal) || isNaN(newVal)) {
+        $scope.$watch('cliData.hvac.setpoint.state', function (newVal, oldVal) {
+            if (isNaN(newVal) || isNaN(oldVal)) {
                 return;
             }
             else if (newVal !== oldVal) {
@@ -91,7 +58,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', 'socket', function (
                     $timeout.cancel(timeoutInstance);
                 }
                 timeoutInstance = $timeout(function () {
-                    $scope.sendCommand($scope.hvac.setpoint);
+                    $scope.sendCommand($scope.cliData.hvac.setpoint);
                 }, 400);
             }
         });
@@ -101,13 +68,21 @@ joebApp.controller("joebController", ['$scope', '$timeout', 'socket', function (
         var myItem = cli2item(slimItem);
         if (myItem === undefined) {
             console.log('error');
+            return;
         }
         myItem.state = slimItem.state;
     });
+    $scope.toggleSwitch = function (theSwitch) {
+        theSwitch.state = !theSwitch.state;
+        $scope.sendCommand(theSwitch);
+    }
     $scope.sendCommand = function (oneItem) {
         socket.emit('command', oneItem);
         console.log('emitted command!');
     };
     $scope.hvacModes = ["Off", "Heat", "AC"];
-
+    $scope.isExpanded = false;
+    $scope.toggleExpansion = function () {
+        $scope.isExpanded = !$scope.isExpanded;
+    }
 }]);
