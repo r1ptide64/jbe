@@ -59,7 +59,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', 'socket', function (
                 }
                 timeoutInstance = $timeout(function () {
                     $scope.sendCommand($scope.cliData.hvac.setpoint);
-                }, 400);
+                }, 2000);
             }
         });
     });

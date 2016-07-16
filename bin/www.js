@@ -17,6 +17,7 @@ var portStr = (app.get('env') === 'production')
 var port = normalizePort(portStr);
 app.set('port', port);
 
+app.items = require('../models/items.js');
 /**
  * Create HTTP server.
  */

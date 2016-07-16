@@ -110,7 +110,7 @@ var routes = require('./routes/index');
 //    debug('change in app.js! newval: ' + newVal + ", oldval: " + oldVal + "  (from " + source + ")");
 //});
 var app = express();
-app.items = require('./models/items.js');
+
 debug('app.items = ' + JSON.stringify(app.items, null, '\t'));
 
 

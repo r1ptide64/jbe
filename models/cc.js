@@ -42,18 +42,48 @@ retObj.AddCastItem = function (client, hostService) {
 }
 
 function onDeviceUp(hostService) {
-
+    if (hostService.name.search('Milkshake') < 0) {
+        return;
+    }
     var client = new Client();
     var host = hostService.addresses[0];
     client.connect(host, function() {
         // debug('client connected!');
         // client.launch(MediaController, function (err, mediaController) {
+        //     if (err) {
+        //         debug('error: ', err);
+        //         return;
+        //     }
         //     debug('media controller launched!');
+        //     setInterval(function () {
+        //         mediaController.getStatus(function (err, status) {
+        //             if (err) {
+        //                 debug('error: ', err);
+        //                 return;
+        //             }
+        //             debug(JSON.stringify(status));
+        //         });
+        //     }, 2000);
         // });
         // var castItem = new CastItem(hostService.name, )
         // console.log('connected, launching app ...');
 
-        // client.launch(DefaultMediaReceiver, function(err, player) {
+        client.launch(DefaultMediaReceiver, function(err, player) {
+            if (err) {
+                console.error(err);
+            }
+            debug('DefaultMediaReceiver launched!');
+            setInterval(function () {
+                player.getStatus(function (err, status) {
+                    if (err) {
+                        console.error(err);
+                    }
+                    else {
+                        debug(JSON.stringify(status, null, '\t'));
+                    }
+                });
+            }, 3000);
+        });
         //     var media = {
         //
         //         // Here you can plug an URL to any mp4, webm, mp3 or jpg file with the proper contentType.
