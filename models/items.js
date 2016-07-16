@@ -2,6 +2,8 @@
 var mqtt = require('mqtt');
 var mongoose = require('mongoose');
 var debug = require('debug')('jbe:items');
+var app = require('../app');
+var isPrd = require('../app').get('env') === 'development';
 
 var connectToDB = function () {
     mongoose.connect('mongodb://127.0.0.1:27017/test');
@@ -28,6 +30,7 @@ var mosquittoServers = {
     laptop: 'mqtt://127.0.0.1:1883',
     desktop: 'mqtt://192.168.1.200:1883'
 };
+
 var client = mqtt.connect(mosquittoServers.desktop);
 client.on('error', function (error) {
     console.error('MQTT error: ' + error);
@@ -224,6 +227,10 @@ var presenceInMQTT = {
     }
 };
 
+var mqttRoot = isPrd
+    ? 'home'
+    : 'test';
+
 var retObj =  {
     switches: {
         porchLight: new Item('Porch Light', 'home/porch-light/light/on', false, SwitchModel, backwardsSwitchMQTT),
@@ -235,8 +242,8 @@ var retObj =  {
         humid: new Item('Humidity', 'home/gf-therm/humidity/humidity', 1, NumberModel, numberInMQTT),
         mode: new Item('Mode', 'mode', 0, NumberModel, { in: false, out: false }),
         setpoint: new Item('Setpoint', 'setpoint', 65, NumberModel, { in: false, out: false }),
-        AC: new Item('AC', 'home/gf-therm/AC/on', false, SwitchModel, forwardsSwitchMQTT),
-        heat: new Item('Heat', 'home/gf-therm/heat/on', false, SwitchModel, forwardsSwitchMQTT),
+        AC: new Item('AC', mqttRoot + '/gf-therm/AC/on', false, SwitchModel, forwardsSwitchMQTT),
+        heat: new Item('Heat', mqttRoot + '/gf-therm/heat/on', false, SwitchModel, forwardsSwitchMQTT),
         blowing: new Item('Blowing', 'blowing', false, SwitchModel, { in: false, out: false })
     },
     cc: {
@@ -244,7 +251,9 @@ var retObj =  {
     }
 };
 
-const MIN_CYCLE_LENGTH = 20*1000;
+const MIN_CYCLE_LENGTH = isPrd
+    ? 5*60*1000
+    : 20*1000;
 const TEMP_WINDOW = 1;
 
 var processTemperatureChange = function () {
@@ -315,7 +324,9 @@ retObj.hvac.blowing.on('update', function (newState) {
 });
 
 var fanTimer = undefined;
-const FAN_TIMEOUT = 1000 * 60 * 20;
+const FAN_TIMEOUT = isPrd
+    ? 1000 * 60 * 20
+    : 20*1000;
 
 retObj.switches.lfbrFan.on('change', function (newState) {
     debug('lfbr fan changed');
