@@ -44,6 +44,14 @@ joebApp.controller("joebController", ['$scope', '$timeout', 'socket', function (
         }
         return undefined;
     };
+    var makePotentialSetpoints = function (start, step, end) {
+        var ret = [];
+        for (var counter = start; counter <= end; counter += step) {
+            ret.push(counter);
+        }
+        return ret;
+    };
+    $scope.setpointAry = makePotentialSetpoints(55, 0.5, 85);
     $scope.socket = socket;
     socket.on('init', function (cliData) {
         console.log(cliData);
