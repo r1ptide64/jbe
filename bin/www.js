@@ -11,7 +11,8 @@ var http = require('http');
 /**
  * Get port from environment and store in Express.
  */
-var portStr = (app.get('env') === 'production')
+var isPrd = app.get('env') === 'production';
+var portStr = isPrd
               ? '80'
               : '3000';
 var port = normalizePort(portStr);

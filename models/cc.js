@@ -42,7 +42,7 @@ retObj.AddCastItem = function (client, hostService) {
 }
 
 function onDeviceUp(hostService) {
-    if (hostService.name.search('Milkshake') < 0) {
+    if (hostService.name.search('Couch') < 0) {
         return;
     }
     var client = new Client();
@@ -67,23 +67,29 @@ function onDeviceUp(hostService) {
         // });
         // var castItem = new CastItem(hostService.name, )
         // console.log('connected, launching app ...');
-
-        client.launch(DefaultMediaReceiver, function(err, player) {
+        client.getStatus(function (err, stat) {
             if (err) {
-                console.error(err);
+                debug(JSON.stringify(err, null, '\t'));
+                return;
             }
-            debug('DefaultMediaReceiver launched!');
-            setInterval(function () {
-                player.getStatus(function (err, status) {
-                    if (err) {
-                        console.error(err);
-                    }
-                    else {
-                        debug(JSON.stringify(status, null, '\t'));
-                    }
-                });
-            }, 3000);
+            debug(JSON.stringify(stat, null, '\t'));
         });
+        // client.launch(DefaultMediaReceiver, function(err, player) {
+        //     if (err) {
+        //         console.error(err);
+        //     }
+        //     debug('DefaultMediaReceiver launched!');
+        //     setInterval(function () {
+        //         player.getStatus(function (err, status) {
+        //             if (err) {
+        //                 console.error(err);
+        //             }
+        //             else {
+        //                 debug(JSON.stringify(status, null, '\t'));
+        //             }
+        //         });
+        //     }, 3000);
+        // });
         //     var media = {
         //
         //         // Here you can plug an URL to any mp4, webm, mp3 or jpg file with the proper contentType.

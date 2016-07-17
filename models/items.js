@@ -3,7 +3,7 @@ var mqtt = require('mqtt');
 var mongoose = require('mongoose');
 var debug = require('debug')('jbe:items');
 var app = require('../app.js');
-var isPrd = app.get('env') === 'development';
+var isPrd = app.get('env') === 'production';
 
 var connectToDB = function () {
     mongoose.connect('mongodb://127.0.0.1:27017/test');
