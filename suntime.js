@@ -1,7 +1,7 @@
 ﻿var SunCalc = require('suncalc');
 var schedule = require('node-schedule');
 var app = require('./app.js');
-var isPrd = app.get('env') === 'production';
+var isPrd = true; //app.get('env') === 'production';
 var debug = require('debug')('jbe:suntime');
 
 

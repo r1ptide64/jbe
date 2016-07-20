@@ -129,6 +129,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 //app.use(express.static(path.join(__dirname, 'views')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
+app.use('/favicon', express.static(path.join(__dirname, 'public', 'favicon')));
 
 //app.use('/', function (req, res, next) {
 //    debug('request to root!');

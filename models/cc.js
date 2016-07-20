@@ -1,8 +1,13 @@
-var Client = require('castv2-client').Client;
-var MediaController = require('castv2-client').MediaController;
-var DefaultMediaReceiver = require('castv2-client').DefaultMediaReceiver;
+var cv2 = require('castv2-client');
+var Client = cv2.Client;
+var MediaController = cv2.MediaController;
+var DefaultMediaReceiver = cv2.DefaultMediaReceiver;
+var Application  = cv2.Application;
 var mdns = require('mdns');
-var debug = require('debug')('jbe:cc');
+var Debug = require('debug');
+var debug = Debug('jbe:cc');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
 
 var sequence = [
     mdns.rst.DNSServiceResolve(),
@@ -16,79 +21,149 @@ var browser = mdns.createBrowser(mdns.tcp('googlecast'), {
 });
 
 browser.on('serviceUp', function (service) {
-    debug('found device %s at %s:%d', service.name, service.addresses[0], service.port);
-    onDeviceUp(service);
+    debug('found device %s at %s:%d', service.txtRecord.fn, service.addresses[0], service.port);
+    if (service.txtRecord.fn.search('Couch') < 0) {
+        // return;
+    }
+    retObj.add(new CastItem(service));
+    // debug(JSON.stringify(retObj, replacer, '\t'));
+    // onDeviceUp(service);
     //debug(JSON.stringify(service, null, '\t'));
 });
 browser.start();
 
 var retObj = {
-    audio: [],
-    video: []
+    count: 0,
+    castItems: {},
+    add: function (castItem) {
+        if (Object.is(this.castItems[castItem.name], undefined)) {
+            this.count++;
+        }
+        this.castItems[castItem.name] = castItem;
+        if (this.count >= 4) {
+            browser.stop();
+        }
+    },
+    remove: function (castItem) {
+        if (!Object.is(this.castItems[castItem.name], undefined)) {
+            this.count--;
+        }
+        this.castItems[castItem.name] = undefined;
+        if (this.count < 4) {
+            browser.start();
+        }
+    }
+};
+
+var Type2Prop = function(typeStr) {
+    switch (typeStr) {
+        case 'Chromecast Audio':
+            return 'audio';
+        case 'Google Cast Group':
+            return 'group';
+        case 'Chromecast':
+            return 'video';
+        default:
+            return 'unknown';
+    }
+};
+function replacer (key, value) {
+    if (key == 'self') {
+        return undefined;
+    }
+    return value;
+}
+var CastItem = function (service) {
+    var debug = Debug('jbe:cc:' + service.txtRecord.fn);
+    debug('constructing CastItem!');
+    EventEmitter.call(this);
+    var self = this;
+    this.name = service.txtRecord.fn;
+    this.type = service.txtRecord.md; //Type2Prop(service.txtRecord.md);
+    var options = {
+        host: service.addresses[0],
+        port: service.port
+    };
+    this.client = new Client();
+    this.reconnect = function () {
+
+    }
+    this.client.on('error', function (err) {
+        debug('error :( ', err);
+        retObj.remove(self);
+    });
+
+    this.processReceiverStatus = function(err, status) {
+        if (err) {
+            debug('error :( ', err);
+            return;
+        }
+        debug('status below');
+        debug(JSON.stringify(status, null, '\t'));
+        var currApp = (status.applications || [])[0];
+    };
+    this.client.on('status', self.processReceiverStatus);
+
+    this.client.connect(options, function () {
+        retObj.add(self);
+        self.client.getStatus(self.processReceiverStatus);
+    })
+};
+
+util.inherits(CastItem, EventEmitter);
+
+var genericCCEvent = function(err, data) {
+    debug('genericCCEvent called from ' + this);
+    if (err) {
+        debug('error! oh, no!');
+        console.error(err);
+        return;
+    }
+    debug('status below:');
+    debug(JSON.stringify(data));
 };
 
 
-var CastItem = function (id, name, client) {
-    this.id = id;
-    this.name = name;
-    this.client = client;
-}
-
-retObj.AddCastItem = function (client, hostService) {
-    var type = (hostService.txtRecord.md === 'Chromecast')
-        ? 'video'
-        : 'audio';
-
-}
-
 function onDeviceUp(hostService) {
-    if (hostService.name.search('Couch') < 0) {
+    debug(JSON.stringify(hostService.txtRecord, null, '\t'));
+
+    if (hostService.name.search('Milkshake') < 0) {
         return;
     }
     var client = new Client();
-    var host = hostService.addresses[0];
-    client.connect(host, function() {
-        // debug('client connected!');
-        // client.launch(MediaController, function (err, mediaController) {
-        //     if (err) {
-        //         debug('error: ', err);
-        //         return;
-        //     }
-        //     debug('media controller launched!');
-        //     setInterval(function () {
-        //         mediaController.getStatus(function (err, status) {
-        //             if (err) {
-        //                 debug('error: ', err);
-        //                 return;
-        //             }
-        //             debug(JSON.stringify(status));
-        //         });
-        //     }, 2000);
-        // });
-        // var castItem = new CastItem(hostService.name, )
-        // console.log('connected, launching app ...');
-        client.getStatus(function (err, stat) {
+    var options = {
+        host: hostService.addresses[0],
+        port: hostService.port
+    };
+    // var makeGoogleMusic = function(session) {
+    //     client.
+    // };
+    client.connect(options, function() {
+        debug('client connected!');
+        // var sessionId = undefined;
+        client.getStatus(genericCCEvent.bind('getStatus'));
+        client.getSessions(function (err, sessions) {
             if (err) {
-                debug(JSON.stringify(err, null, '\t'));
+                console.error(err);
                 return;
             }
-            debug(JSON.stringify(stat, null, '\t'));
+            debug('got sessions! ', JSON.stringify(sessions, null, '\t'));
+            // var googleMusic = new DefaultMediaReceiver(client.client, sessions[0]);
+            // googleMusic.on('status', genericCCEvent.bind('googleMusic'));
+            // googleMusic.getStatus(genericCCEvent);
         });
+
+
         // client.launch(DefaultMediaReceiver, function(err, player) {
         //     if (err) {
         //         console.error(err);
+        //         return;
         //     }
         //     debug('DefaultMediaReceiver launched!');
-        //     setInterval(function () {
-        //         player.getStatus(function (err, status) {
-        //             if (err) {
-        //                 console.error(err);
-        //             }
-        //             else {
-        //                 debug(JSON.stringify(status, null, '\t'));
-        //             }
-        //         });
-        //     }, 3000);
+        //     player.on('status', function(status) {
+        //         debug('player received status update!');
+        //         debug(JSON.stringify(status, null, '\t'));
+        //     });
         // });
         //     var media = {
         //
@@ -108,9 +183,7 @@ function onDeviceUp(hostService) {
         //         }
         //     };
         //
-        //     player.on('status', function(status) {
-        //         console.log('status broadcast playerState=%s', status.playerState);
-        //     });
+
         //
         //     console.log('app "%s" launched, loading media %s ...', player.session.displayName, media.contentId);
         //
@@ -135,7 +208,7 @@ function onDeviceUp(hostService) {
         client.close();
     });
 
-}
+};
 function oldondeviceup(hostService) {
     debug('found device %s at %s:%d', hostService.name, hostService.addresses[0], hostService.port);
     debug(JSON.stringify(hostService, null, '\t'));
