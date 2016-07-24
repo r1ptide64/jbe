@@ -1,6 +1,7 @@
 ﻿var app = require('./app.js');
 var debug = require('debug')('jbe:socket');
 var items = app.items;
+var cc = require('./models/cc.js');
 
 var item2cli = function (item) {
     return {
@@ -75,6 +76,9 @@ var connected = function (socket) {
 
 var retFn = function (server) {
     var io = require('socket.io')(server);
+    cc.on('add', function (name) {
+        io.emit('cc', cc.castItems[name]);
+    });
     Object.keys(items).forEach(function (itemType) {
         Object.keys(items[itemType]).forEach(function (itmIndx) {
             var theItem = items[itemType][itmIndx];

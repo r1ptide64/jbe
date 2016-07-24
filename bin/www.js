@@ -3,8 +3,9 @@
 /**
  * Module dependencies.
  */
-
 var app = require('../app');
+app.items = require('../models/defs');
+var Socket = require('../models/socket');
 var debug = require('debug')('jbe:server');
 var http = require('http');
 
@@ -18,14 +19,12 @@ var portStr = isPrd
 var port = normalizePort(portStr);
 app.set('port', port);
 
-app.items = require('../models/items.js');
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
-app.io = require('../jb-socket')(server);
-require('../suntime');
+app.socket = Socket(server);
+// require('../suntime');
 
 /**
  * Listen on provided port, on all network interfaces.

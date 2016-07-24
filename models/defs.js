@@ -1,12 +1,12 @@
-﻿var Item    = require('./item'),
+var Item    = require('./item'),
     Manager = require('./manager'),
     Maps    = require('./maps');
 
-var manager = new Manager();
+var definitions = new Manager();
 
 var mqttRoot = 'test';
 
-manager.insert([
+definitions.insert([
     new Item('porchLight', 'Porch Light', 'switch', false, {
         mqtt: new Maps.BackwardsSwitchMQTT('home/porch-light/light/on'),
         db  : true
@@ -35,7 +35,7 @@ manager.insert([
         mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/gf-therm/AC/on'),
         db  : true
     }),
-    new Item('Heat', 'heat', 'hvac', false, {
+    new Item('heat', 'Heat', 'hvac', false, {
         mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/gf-therm/heat/on'),
         db  : true
     }),
@@ -44,3 +44,5 @@ manager.insert([
         db  : true
     })
 ]);
+
+module.exports = definitions;

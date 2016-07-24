@@ -44,7 +44,7 @@
             </md-card-title>
             <md-card-content layout="column">
                 <md-list>
-                    <md-list-item ng-repeat="switch in cliData.switches" ng-click="toggleSwitch(switch)">
+                    <md-list-item ng-repeat="switch in items.switch" ng-click="toggleSwitch(switch)">
                         <md-icon>lightbulb_outline</md-icon>
                         <p>{{switch.name}}</p>
                         <md-switch class="md-secondary" ng-model="switch.state" ng-change="sendCommand(switch)"></md-switch>
@@ -63,19 +63,19 @@
                     <md-list-item>
                         <p>Temperature</p>
                             <span class="md-secondary">
-                                {{cliData.hvac.temp.state}}&nbsp;&deg;F
+                                {{items.hvac.temp.state}}&nbsp;&deg;F
                             </span>
                     </md-list-item>
                     <md-list-item>
                         <p>Humidity</p>
                             <span class="md-secondary">
-                                {{cliData.hvac.humid.state}}%
+                                {{items.hvac.humid.state}}%
                             </span>
                     </md-list-item>
                     <md-divider></md-divider>
                     <md-list-item>
                         <p>Setpoint</p>
-                        <md-select ng-model="cliData.hvac.setpoint.state" md-on-close="sendCommand(cliData.hvac.setpoint)">
+                        <md-select ng-model="items.hvac.setpoint.state" md-on-close="sendCommand(items.hvac.setpoint)">
                             <md-option ng-repeat="setpoint in setpointAry">
                                 {{setpoint}}
                             </md-option>
@@ -84,16 +84,16 @@
                     <!--<md-list-item>-->
                         <!--<p>Setpoint</p>-->
                         <!--<md-slider-container>-->
-                            <!--<md-slider min="55" max="85" step="0.5" ng-model="cliData.hvac.setpoint.state" aria-label="red" id="red-slider"></md-slider>-->
-                            <!--<p>{{cliData.hvac.setpoint.state.toPrecision(3)}}&nbsp;&deg;F</p>-->
+                            <!--<md-slider min="55" max="85" step="0.5" ng-model="items.hvac.setpoint.state" aria-label="red" id="red-slider"></md-slider>-->
+                            <!--<p>{{items.hvac.setpoint.state.toPrecision(3)}}&nbsp;&deg;F</p>-->
                             <!--&lt;!&ndash;                                <md-input-container>-->
-                                                                <!--<input md-no-resize="true" type="number" ng-model="cliData.hvac.setpoint.state" aria-label="red" aria-controls="red-slider">-->
+                                                                <!--<input md-no-resize="true" type="number" ng-model="items.hvac.setpoint.state" aria-label="red" aria-controls="red-slider">-->
                                                             <!--</md-input-container>&ndash;&gt;-->
                         <!--</md-slider-container>-->
                     <!--</md-list-item>-->
                     <md-list-item>
                         <p>Mode</p>
-                        <md-radio-group layout="row" ng-model="cliData.hvac.mode.state" ng-change="sendCommand(cliData.hvac.mode)">
+                        <md-radio-group layout="row" ng-model="items.hvac.mode.state" ng-change="sendCommand(items.hvac.mode)">
                             <md-radio-button ng-value=0>Off</md-radio-button>
                             <md-radio-button ng-value=1>Heat</md-radio-button>
                             <md-radio-button ng-value=2>AC</md-radio-button>

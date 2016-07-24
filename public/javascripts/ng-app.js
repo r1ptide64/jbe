@@ -1,4 +1,4 @@
-var joebApp = angular.module('joebApp', ['ngMaterial', 'ngResource']);
+var joebApp = angular.module('joebApp', ['ngMaterial']);
 
 joebApp.config(function ($mdThemingProvider) {
     $mdThemingProvider.theme('default')
@@ -53,32 +53,38 @@ joebApp.controller("joebController", ['$scope', '$timeout', 'socket', function (
     };
     $scope.setpointAry = makePotentialSetpoints(55, 0.5, 85);
     $scope.socket = socket;
-    socket.on('init', function (cliData) {
-        console.log(cliData);
-        $scope.cliData = cliData;
-        var timeoutInstance;
-        $scope.$watch('cliData.hvac.setpoint.state', function (newVal, oldVal) {
-            if (isNaN(newVal) || isNaN(oldVal)) {
-                return;
-            }
-            else if (newVal !== oldVal) {
-                if (timeoutInstance) {
-                    $timeout.cancel(timeoutInstance);
-                }
-                timeoutInstance = $timeout(function () {
-                    $scope.sendCommand($scope.cliData.hvac.setpoint);
-                }, 2000);
-            }
-        });
+    socket.on('init', function (items) {
+        console.log(items);
+        $scope.items = items;
+        // var timeoutInstance;
+        // $scope.$watch('items.hvac.setpoint.state', function (newVal, oldVal) {
+        //     if (isNaN(newVal) || isNaN(oldVal)) {
+        //         return;
+        //     }
+        //     else if (newVal !== oldVal) {
+        //         if (timeoutInstance) {
+        //             $timeout.cancel(timeoutInstance);
+        //         }
+        //         timeoutInstance = $timeout(function () {
+        //             $scope.sendCommand($scope.items.hvac.setpoint);
+        //         }, 2000);
+        //     }
+        // });
     });
     socket.on('change', function (slimItem) {
         console.log('change, slimItem = ' + JSON.stringify(slimItem));
-        var myItem = cli2item(slimItem);
-        if (myItem === undefined) {
-            console.log('error');
-            return;
-        }
-        myItem.state = slimItem.state;
+        // validate input
+        if (!slimItem || !slimItem.type || !slimItem.id) return;
+        var typeNode = $scope.items[slimItem.type];
+        if (typeNode === undefined) return;
+        var fullItem = typeNode[slimItem.id];
+        if (fullItem === undefined) return;
+
+        // save data
+        fullItem.state = slimItem.state;
+    });
+    socket.on('cc', function (cc) {
+        console.log(JSON.stringify(cc, null, '\t'));
     });
     $scope.toggleSwitch = function (theSwitch) {
         theSwitch.state = !theSwitch.state;
@@ -86,7 +92,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', 'socket', function (
     }
     $scope.sendCommand = function (oneItem) {
         socket.emit('command', oneItem);
-        console.log('emitted command!');
+        console.log('emitted command! oneItem = ' + JSON.stringify(oneItem));
     };
     $scope.hvacModes = ["Off", "Heat", "AC"];
     $scope.isExpanded = false;
