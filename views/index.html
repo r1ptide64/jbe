@@ -76,7 +76,7 @@
                     <md-list-item>
                         <p>Setpoint</p>
                         <md-select ng-model="items.hvac.setpoint.state" md-on-close="sendCommand(items.hvac.setpoint)">
-                            <md-option ng-repeat="setpoint in setpointAry">
+                            <md-option ng-value="setpoint" ng-repeat="setpoint in setpointAry">
                                 {{setpoint}}
                             </md-option>
                         </md-select>
