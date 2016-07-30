@@ -35,4 +35,15 @@ Item.prototype.setState = function (newState, source) {
     this.emit('change', newState, oldState, source);
 };
 
+Item.prototype.toJSON = function () {
+    return {
+        id: this.id,
+        name: this.name,
+        type: this.type,
+        lastUpdate: this.lastUpdate,
+        lastChange: this.lastChange,
+        state: this.state
+    };
+}
+
 module.exports = Item;

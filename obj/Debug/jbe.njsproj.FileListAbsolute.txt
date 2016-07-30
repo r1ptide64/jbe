@@ -1,2 +1,0 @@
-C:\Users\r00t\jbe\obj\Debug\jbe.njsprojResolveAssemblyReference.cache
-C:\Users\r00t\jbe\bin\Microsoft.NodejsTools.WebRole.dll

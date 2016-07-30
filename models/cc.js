@@ -8,6 +8,7 @@ var Debug = require('debug');
 var debug = Debug('jbe:cc');
 const EventEmitter = require('events').EventEmitter;
 const util = require('util');
+var Item = require('./item');
 
 var sequence = [
     mdns.rst.DNSServiceResolve(),
@@ -25,7 +26,7 @@ browser.on('serviceUp', function (service) {
     if (service.txtRecord.fn.search('Milkshake') < 0) {
         return;
     }
-    retObj.add(new CastItem(service));
+    // retObj.add(new CastItem(service));
     // debug(JSON.stringify(retObj, replacer, '\t'));
     onDeviceUp(service);
     //debug(JSON.stringify(service, null, '\t'));
@@ -84,12 +85,12 @@ var isMediaNamespace = function(namespace) {
 }
 
 var CastItem = function (service) {
-    var debug = Debug('jbe:cc:' + service.txtRecord.fn);
+    // var debug = Debug('jbe:cc:' + service.txtRecord.fn);
     debug('constructing CastItem!');
     EventEmitter.call(this);
     var self = this;
-    this.name = service.txtRecord.fn;
-    this.type = service.txtRecord.md; //Type2Prop(service.txtRecord.md);
+    Item.call(this, service.addresses[0] + service.port, service.txtRecord.fn, 'cc');
+    this.castType = service.txtRecord.md;
     this.mediaReceiver = undefined;
     this.media = undefined;
 
@@ -99,8 +100,7 @@ var CastItem = function (service) {
     };
     this.client = new Client();
     this.client.on('error', function (err) {
-        debug('error :( ', err);
-        retObj.remove(self);
+        debug('error :( ' + err);
     });
 
     this.processMediaStatus = function(err, status) {
@@ -140,6 +140,7 @@ var CastItem = function (service) {
             self.mediaReceiver.getStatus(self.processMediaStatus);
         }
     };
+
     this.client.on('status', self.processReceiverStatus.bind(this, null));
 
     this.client.connect(options, function () {
@@ -208,8 +209,8 @@ function onDeviceUp(hostService) {
             var media = {
 
                 // Here you can plug an URL to any mp4, webm, mp3 or jpg file with the proper contentType.
-                contentId: 'http://mp3.wpr.org/download.php?f=zph160723z.mp3',
-                contentType: 'audio/mp3',
+                contentId: 'http://wpr-ice.streamguys.net/wpr-ideas-mp3-64',
+                contentType: 'audio/mpeg',
                 streamType: 'BUFFERED', // or LIVE
 
                 // Title and cover displayed while buffering

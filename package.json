@@ -20,6 +20,7 @@
     "express": "^4.13.4",
     "jade": "~1.11.0",
     "material-design-icons": "^2.2.3",
+    "mdns": "^2.3.3",
     "mongoose": "^4.5.0",
     "morgan": "~1.6.1",
     "mqtt": "^1.11.2",

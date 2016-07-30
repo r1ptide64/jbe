@@ -27,6 +27,10 @@ definitions.insert([
         mqtt: new Maps.NumerInMQTT('home/gf-therm/humidity/humidity'),
         db  : true
     }),
+    new Item('mode', 'Mode', 'hvac', 0, {
+        mqtt: false,
+        db  : true
+    }),
     new Item('setpoint', 'Setpoint', 'hvac', 72.5, {
         mqtt: false,
         db  : true
@@ -39,7 +43,7 @@ definitions.insert([
         mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/gf-therm/heat/on'),
         db  : true
     }),
-    new Item('Blowing', 'blowing', false, {
+    new Item('blowing', 'Blowing', 'hvac', false, {
         mqtt: false,
         db  : true
     })

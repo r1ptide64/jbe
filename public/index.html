@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Gingiel-Bordon Basestar</title>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
@@ -11,7 +10,7 @@
     <link rel="shortcut icon" href="/favicon/favicon.ico">
     <meta name="msapplication-config" content="/favicon/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no"/>
     <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="/node_modules/angular/angular.js"></script>
@@ -20,7 +19,7 @@
     <script src="/node_modules/angular-animate/angular-animate.js"></script>
     <script src="/node_modules/angular-material/angular-material.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/javascripts/ng-app.js"></script>
+    <script src="ng-app.js"></script>
 </head>
 
 <body ng-app="joebApp">
@@ -35,8 +34,8 @@
             </div>
         </md-toolbar>
     </div>
-    <md-content layout-xs="column" layout="row" layout-wrap layout-align="space-around" >
-        <md-card flex-gt-sm="auto" flex="auto">
+    <md-content layout-xs="column" layout="row" layout-wrap layout-align="space-around">
+        <md-card flex="auto">
             <md-card-title>
                 <md-card-title-text>
                     <span class="md-headline">Switches</span>
@@ -47,12 +46,13 @@
                     <md-list-item ng-repeat="switch in items.switch" ng-click="toggleSwitch(switch)">
                         <md-icon>lightbulb_outline</md-icon>
                         <p>{{switch.name}}</p>
-                        <md-switch class="md-secondary" ng-model="switch.state" ng-change="sendCommand(switch)"></md-switch>
+                        <md-switch class="md-secondary" ng-model="switch.state"
+                                   ng-change="sendCommand(switch)"></md-switch>
                     </md-list-item>
                 </md-list>
             </md-card-content>
         </md-card>
-        <md-card flex-gt-sm="auto" flex="auto" >
+        <md-card flex="auto">
             <md-card-title>
                 <md-card-title-text>
                     <span class="md-headline">Climate</span>
@@ -62,13 +62,13 @@
                 <md-list flex>
                     <md-list-item>
                         <p>Temperature</p>
-                            <span class="md-secondary">
+                        <span class="md-secondary">
                                 {{items.hvac.temp.state}}&nbsp;&deg;F
                             </span>
                     </md-list-item>
                     <md-list-item>
                         <p>Humidity</p>
-                            <span class="md-secondary">
+                        <span class="md-secondary">
                                 {{items.hvac.humid.state}}%
                             </span>
                     </md-list-item>
@@ -81,19 +81,10 @@
                             </md-option>
                         </md-select>
                     </md-list-item>
-                    <!--<md-list-item>-->
-                        <!--<p>Setpoint</p>-->
-                        <!--<md-slider-container>-->
-                            <!--<md-slider min="55" max="85" step="0.5" ng-model="items.hvac.setpoint.state" aria-label="red" id="red-slider"></md-slider>-->
-                            <!--<p>{{items.hvac.setpoint.state.toPrecision(3)}}&nbsp;&deg;F</p>-->
-                            <!--&lt;!&ndash;                                <md-input-container>-->
-                                                                <!--<input md-no-resize="true" type="number" ng-model="items.hvac.setpoint.state" aria-label="red" aria-controls="red-slider">-->
-                                                            <!--</md-input-container>&ndash;&gt;-->
-                        <!--</md-slider-container>-->
-                    <!--</md-list-item>-->
                     <md-list-item>
                         <p>Mode</p>
-                        <md-radio-group layout="row" ng-model="items.hvac.mode.state" ng-change="sendCommand(items.hvac.mode)">
+                        <md-radio-group layout="row" ng-model="items.hvac.mode.state"
+                                        ng-change="sendCommand(items.hvac.mode)">
                             <md-radio-button ng-value=0>Off</md-radio-button>
                             <md-radio-button ng-value=1>Heat</md-radio-button>
                             <md-radio-button ng-value=2>AC</md-radio-button>
@@ -102,7 +93,7 @@
                 </md-list>
             </md-card-content>
         </md-card>
-        <md-card flex-gt-sm="auto" flex="auto">
+        <md-card flex="auto">
             <md-card-title>
                 <md-card-title-text>
                     <span class="md-headline">Presence</span>
@@ -112,20 +103,20 @@
                 <md-list flex>
                     <md-list-item>
                         <p>Josh</p>
-                            <span class="md-secondary">
+                        <span class="md-secondary">
                                 Unknown
                             </span>
                     </md-list-item>
                     <md-list-item>
                         <p>Chelsea</p>
-                            <span class="md-secondary">
+                        <span class="md-secondary">
                                 Unknown
                             </span>
                     </md-list-item>
                 </md-list>
             </md-card-content>
         </md-card>
-        <md-card flex-gt-sm="auto" flex="auto">
+        <md-card flex="auto">
             <md-card-title>
                 <md-card-title-text>
                     <span class="md-headline">Media</span>
@@ -133,7 +124,39 @@
             </md-card-title>
             <md-card-content layout="column">
                 <md-list flex>
-                    <md-list-item class="md-2-line" ng-click="toggleExpansion()">
+                    <div ng-repeat="castItem in items.cc">
+                        <md-divider ng-show="castItem.expanded"></md-divider>
+                        <md-list-item ng-click="toggleExpansion(castItem)" class="md-2-line">
+                            <!--class="{{ castItem.active ? 'md-3-line' : 'md-2-line' }}"-->
+                            <md-icon ng-style="castItem.active ? {color: '#8BC34A'} : {color: 'grey'}">
+                                {{ castIcon(castItem) }}
+                            </md-icon>
+                            <div class="md-list-item-text">
+                                <h3 class="md-subhead">{{castItem.name}}</h3>
+                                <p class="md-body-2">{{castItem.active ?
+                                    castItem.receiverStatus.applications[0].displayName : 'Inactive'}}</p>
+                            </div>
+                            <md-icon class="md-secondary">
+                                {{ castItem.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+                            </md-icon>
+                        </md-list-item>
+                        <div ng-show="castItem.expanded" layout="column">
+                            <md-list-item class="md-2-line" flex>
+                                <div class="md-list-item-text md-offset">
+                                    <h4>{{castItem.media.metadata.title}}</h4>
+                                </div>
+                            </md-list-item>
+                            <md-slider-container flex style="margin-left: 72px; margin-right: 16px">
+                                <md-slider min="0" max="1" ng-model="castItem.receiverStatus.volume.level" step="{{castItem.receiverStatus.volume.stepInterval}}"></md-slider>
+                            </md-slider-container>
+                            <div flex style="margin-left: 72px; margin-right: 16px" layout="row" layout-align="space-between start">
+                                <span>{{castCurrentTime(castItem)}}</span>
+                                <span>{{castDuration(castItem)}}</span>
+                            </div>
+                        </div>
+                        <md-divider ng-show="castItem.expanded"></md-divider>
+                    </div>
+                    <!--<md-list-item class="md-2-line" ng-click="toggleExpansion()">
                         <md-icon>video_library</md-icon>
                         <div class="md-list-item-text">
                             <h3>Couch Potatoes by Bittman</h3>
@@ -195,7 +218,7 @@
                         <md-button class="md-icon-button" aria-label="Custom Icon Button">
                             <md-icon>volume_up</md-icon>
                         </md-button>
-                    </div>
+                    </div>-->
                 </md-list>
             </md-card-content>
         </md-card>
@@ -209,5 +232,4 @@
     </md-content>
 </div>
 </body>
-
 </html>

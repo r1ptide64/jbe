@@ -1,13 +1,53 @@
 var Item         = require('./item.js'),
     util         = require('util'),
     EventEmitter = require('events').EventEmitter,
-    debug        = require('debug')('jbe:manager');
+    debug        = require('debug')('jbe:manager'),
+    mdns         = require('mdns'),
+    CastItem     = require('./castitem');
+
 
 function Manager() {
     this.items = {};
+    this.items.cc = {};
     EventEmitter.call(this);
+    var sequence = [
+        mdns.rst.DNSServiceResolve(),
+        'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({
+            families: [4]
+        }),
+        mdns.rst.makeAddressesUnique()
+    ];
+    this.browser = mdns.createBrowser(mdns.tcp('googlecast'), {
+        resolverSequence: sequence
+    });
+    this.browser.on('serviceUp', (service) => {
+        if (service.txtRecord.fn.search('Milkshake') < 0) {
+            // return;
+        }
+        this.addCastItem(service);
+    });
+    this.browser.start();
 }
 util.inherits(Manager, EventEmitter);
+
+Manager.prototype.addCastItem = function (service) {
+    debug('found device %s at %s:%d', service.txtRecord.fn, service.addresses[0], service.port);
+    var newCastItem = new CastItem(service);
+
+    this.insert(newCastItem);
+    newCastItem.once('error', (err) => {
+        debug(newCastItem.name + ' encountered an error! ' + err);
+        delete this.items.cc[newCastItem.id];
+        this.browser.start();
+    });
+    newCastItem.on('castUpdate', (updates) => {
+        this.emit('castUpdate', newCastItem.id, updates);
+    });
+    if (Object.keys(this.items.cc).length >= 4) {
+        debug('all chromecasts discovered, stopping browser.');
+        this.browser.stop();
+    }
+}
 
 Manager.prototype.insert = function (items) {
     if (!Array.isArray(items)) {

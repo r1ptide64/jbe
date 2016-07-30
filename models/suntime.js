@@ -1,8 +1,9 @@
 ﻿var SunCalc = require('suncalc');
 var schedule = require('node-schedule');
-var app = require('./app.js');
+var app = require('../app');
 var isPrd = true; //app.get('env') === 'production';
 var debug = require('debug')('jbe:suntime');
+var CastItem = require('./castitem');
 
 
 var sunFunction = function (newState) {
@@ -11,26 +12,27 @@ var sunFunction = function (newState) {
         'set.' :
         'risen.';
     debug(debugStr);
-    app.items.switches.porchLight.setState(newState, 'suntime');
+    app.manager.items.switch.porchLight.setState(newState, 'suntime');
 };
 
-var recalcSunset = function () {
+function CalculateSunset() {
     debug('recalculating sun times!');
     var times = isPrd
         ? SunCalc.getTimes(Date.now(), 43.003852, -89.5107942)
         : {
-            sunrise: new Date(Date.now() + 5*1000),
-            sunset: new Date(Date.now() + 10*1000)
+        sunrise: new Date(Date.now() + 5 * 1000),
+        sunset : new Date(Date.now() + 10 * 1000)
     };
     debug('times = ' + JSON.stringify(times));
-    var j1 = schedule.scheduleJob(times.sunrise, function () { sunFunction(false); });
-    var j2 = schedule.scheduleJob(times.sunset, function () { sunFunction(true); });
+    schedule.scheduleJob(times.sunrise, sunFunction.bind(sunFunction, false)); // function () { sunFunction(false); });
+    schedule.scheduleJob(times.sunset, sunFunction.bind(sunFunction, true));
 };
 
 var cronStr = isPrd
     ? '0 2 * * *'
     : '*/20 * * * * *';
 
-var j0 = schedule.scheduleJob(cronStr, recalcSunset);
-recalcSunset();
+
+schedule.scheduleJob(cronStr, CalculateSunset);
+CalculateSunset();
 debug('set sun recalculating job!');
