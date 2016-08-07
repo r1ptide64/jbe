@@ -5,30 +5,38 @@ var Item         = require('./item.js'),
     mdns         = require('mdns'),
     CastItem     = require('./castitem');
 
+var sequence = [
+    mdns.rst.DNSServiceResolve(),
+    'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({
+        families: [4]
+    }),
+    mdns.rst.makeAddressesUnique()
+];
+
+function setupBrowser() {
+    this.browser = mdns.createBrowser(mdns.tcp('googlecast'), {
+        resolverSequence: sequence
+    });
+    this.browser.on('serviceUp', (service) => {
+        this.addCastItem(service);
+    });
+    this.browser.once('error', this.onBrowserError.bind(this));
+    this.browser.start();
+}
 
 function Manager() {
     this.items = {};
     this.items.cc = {};
     EventEmitter.call(this);
-    var sequence = [
-        mdns.rst.DNSServiceResolve(),
-        'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({
-            families: [4]
-        }),
-        mdns.rst.makeAddressesUnique()
-    ];
-    this.browser = mdns.createBrowser(mdns.tcp('googlecast'), {
-        resolverSequence: sequence
-    });
-    this.browser.on('serviceUp', (service) => {
-        if (service.txtRecord.fn.search('Milkshake') < 0) {
-            // return;
-        }
-        this.addCastItem(service);
-    });
-    this.browser.start();
+    setupBrowser.call(this);
 }
 util.inherits(Manager, EventEmitter);
+
+Manager.prototype.onBrowserError = function (err) {
+    debug('mdns browser encountered an error: ' + err);
+    delete this.browser;
+    setupBrowser.call(this);
+};
 
 Manager.prototype.addCastItem = function (service) {
     debug('found device %s at %s:%d', service.txtRecord.fn, service.addresses[0], service.port);
@@ -38,7 +46,11 @@ Manager.prototype.addCastItem = function (service) {
     newCastItem.once('error', (err) => {
         debug(newCastItem.name + ' encountered an error! ' + err);
         delete this.items.cc[newCastItem.id];
-        this.browser.start();
+        try {
+            this.browser.start();
+        } catch (err) {
+            this.onBrowserError(err);
+        }
     });
     newCastItem.on('castUpdate', (updates) => {
         this.emit('castUpdate', newCastItem.id, updates);
