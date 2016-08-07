@@ -46,7 +46,7 @@ function CastItem(service) {
         var currApp = (status.applications || [])[0];
         this.active = !(currApp === undefined || currApp.isIdleScreen);
 
-        if (!this.active) {
+        if (!this.active || !currApp.namespaces) {
             delete this.mediaReceiver;
         }
         else if (currApp.namespaces.some(isMediaNamespace)) {
