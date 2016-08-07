@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 var app = require('../app');
+var isPrd = app.get('env') === 'production';
+app.isPrd = isPrd;
 app.manager = require('../models/defs');
 require('../models/suntime');
 require('../models/fantimer');
@@ -15,8 +17,7 @@ var http = require('http');
 /**
  * Get port from environment and store in Express.
  */
-var isPrd = app.get('env') === 'production';
-app.isPrd = isPrd;
+
 var portStr = isPrd
               ? '80'
               : '3000';

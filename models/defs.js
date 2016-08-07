@@ -1,10 +1,13 @@
 var Item    = require('./item'),
     Manager = require('./manager'),
-    Maps    = require('./maps');
+    Maps    = require('./maps'),
+    app     = require('../app');
 
 var definitions = new Manager();
 
-var mqttRoot = 'test';
+var mqttRoot = app.isPrd
+    ? 'home'
+    : 'test';
 
 definitions.insert([
     new Item('porchLight', 'Porch Light', 'switch', false, {
