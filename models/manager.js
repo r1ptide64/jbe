@@ -47,7 +47,14 @@ Manager.prototype.addCastItem = function (service) {
         debug('all chromecasts discovered, stopping browser.');
         this.browser.stop();
     }
-}
+};
+
+Manager.prototype.castCmd = function (cmdData) {
+    if (!cmdData || !cmdData.id) return;
+    var castItem = this.items.cc[cmdData.id];
+    if (!castItem) return;
+    castItem.exec(cmdData.command, cmdData.params);
+};
 
 Manager.prototype.insert = function (items) {
     if (!Array.isArray(items)) {

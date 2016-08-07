@@ -20,9 +20,10 @@ function onConnection(socket) {
     socket.on('command', (slimItem) => {
         manager.processCmd(slimItem);
     });
-    socket.on('castCmd', (instructions) => {
+    socket.on('castCmd', (cmdData) => {
         debug('received cast command!');
-        debug(JSON.stringify(instructions, null, '\t'));
+        debug(JSON.stringify(cmdData, null, '\t'));
+        manager.castCmd(cmdData);
     });
     socket.on('disconnect', () => {
         debug('socket connection removed.');

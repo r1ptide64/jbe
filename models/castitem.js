@@ -18,6 +18,7 @@ function CastItem(service) {
         this.emit('error', err);
     });
     this.processMediaStatus = function (err, status) {
+        var now = Date.now();
         if (err || !status) {
             debug('error :( ', err);
             return;
@@ -29,6 +30,7 @@ function CastItem(service) {
             this.media = status.media;
             updates.media = status.media;
         }
+        status.timestamp = now;
         this.mediaStatus = status;
         updates.mediaStatus = status;
         this.emit('castUpdate', updates);
@@ -84,7 +86,50 @@ CastItem.prototype.toJSON = function () {
     ret.mediaStatus = this.mediaStatus;
     ret.active = this.active;
     return ret;
-}
+};
+
+CastItem.prototype.exec = function (command, params) {
+    if (!command) return;
+
+    var fn = this[command];
+    if (typeof fn !== 'function') return;
+
+    fn.call(this, params);
+};
+
+CastItem.prototype.playCustomMedia = function (media) {
+    this.client.launch(DefaultMediaReceiver, (err, player) => {
+        player.load(media, { autoplay: true }, (err, status) => {
+            if (err) {
+                debug('error :(' + err);
+            }
+            else {
+                debug('playing media!');
+                debug(status);
+            }
+        });
+    });
+};
+
+CastItem.prototype.setVolume = function (volume) {
+    this.client.setVolume(volume, (err, newVolume) => {
+        debug('set volume, err = ' + err + ', newVolume = ' + newVolume);
+    });
+};
+
+CastItem.prototype.stopCasting = function () {
+    if (!this.receiverStatus || !this.receiverStatus.applications) {
+        return;
+    }
+    this.client.receiver.stop(this.receiverStatus.applications[0].sessionId, (err, status) => {
+        if (err) {
+            debug('error :( ' + err);
+        }
+        else {
+            debug('stop successful. ' + status);
+        }
+    });
+};
 
 function isMediaNamespace(namespace) {
     return namespace.name === 'urn:x-cast:com.google.cast.media';
