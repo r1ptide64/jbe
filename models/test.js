@@ -1,26 +1,60 @@
-﻿var Item = require('./item');
-var debug = require('debug')('jbe:test');
+﻿var debug = require('debug')('jbe:test');
 var util = require('util');
 var EventEmitter = require('events');
 
-function TestClass() {
-    this.propOne = 3;
-    this.poo = 'pee';
-    this.methodOne = function () {
-        debug('methodOne, this = ' + JSON.stringify(this));
-    }
-    // this.Speak('constructing!');
-    // Item.call(this, 'poo', 'pee', 'poopee', false);
-    // this.newProp = 'bacon';
-    // this.on('testEvent', (msg) => debug(msg));
-}
-TestClass.prototype.methodTwo = function () {
-    debug('methodTwo, this = ' + JSON.stringify(this));
+function SuperCtor() {
+    this.x = 25;
 }
 
-var testInstance = new TestClass();
-testInstance.methodOne();
-testInstance.methodTwo();
-// testInstance.Speak('done constructing!');
-// debug('testInstance: ' + JSON.stringify(testInstance));
-// testInstance.emit('testEvent', 'test message!');
+function Ctor() {
+    this.y = 10;
+}
+
+util.inherits(Ctor, SuperCtor);
+
+var tmp = new Ctor();
+debug(tmp instanceof Ctor);
+debug(tmp instanceof SuperCtor);
+
+// function TestBrowser() {
+//     debug('constructing browser!');
+//     this.count = 0;
+//     EventEmitter.call(this);
+// }
+// util.inherits(TestBrowser, EventEmitter);
+//
+// TestBrowser.prototype.start = function () {
+//     debug('TestBrowser started!');
+//     this.interval = setInterval(() => {
+//         this.count++;
+//         debug('count = ' + this.count);
+//         if (this.count >= 3) {
+//             this.emit('error', 'BIGBUTTS');
+//         }
+//     }, 2500);
+// };
+//
+// function TestManager() {
+//     this.x = 1;
+//     function pewp() {
+//         this.x = 10;
+//     }
+//     setupBrowser.call(this);
+// }
+//
+// TestManager.prototype.onBrowserError = function (err) {
+//     debug('manager heard about browser\'s error: ' + err);
+//     clearInterval(this.browser.interval);
+//     delete this.browser;
+//     setupBrowser.call(this);
+// };
+//
+// function setupBrowser() {
+//     debug('setting up browser!');
+//     this.browser = new TestBrowser();
+//     this.browser.once('error', this.onBrowserError.bind(this));
+//     this.browser.start();
+// }
+//
+// var tmp = new TestManager();
+// setTimeout(tmp.pewp, 1500);
