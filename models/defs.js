@@ -11,15 +11,15 @@ var mqttRoot = app.isPrd
 
 definitions.insert([
     new Item('porchLight', 'Porch Light', 'switch', false, {
-        mqtt: new Maps.BackwardsSwitchMQTT('home/porch-light/light/on'),
+        mqtt: new Maps.BackwardsSwitchMQTT(mqttRoot + '/porch-light/light/on'),
         db  : true
     }),
     new Item('lfbrLight', 'Lower Bathroom Light', 'switch', false, {
-        mqtt: new Maps.BackwardsSwitchMQTT('home/lf-bath/fan/on'),
+        mqtt: new Maps.BackwardsSwitchMQTT(mqttRoot + '/lf-bath/fan/on'),
         db  : true
     }),
     new Item('lfbrFan', 'Lower Bathroom Fan', 'switch', false, {
-        mqtt: new Maps.ForwardsSwitchMQTT('home/lf-bath/light/on'),
+        mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/lf-bath/light/on'),
         db  : true
     }),
     new Item('temp', 'Temperature', 'hvac', 0, {
