@@ -8,7 +8,7 @@ var Item                 = require('./item'),
 function CastItem(service) {
     // validate parameter
     if (!service || !Array.isArray(service.addresses) || !service.port || !service.txtRecord) {
-        throw new Error('poop');
+        return;
     }
 
     Item.call(this, service.addresses[0] + ':' + service.port, service.txtRecord.fn, 'cc');

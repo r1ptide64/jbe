@@ -14,14 +14,27 @@ var sequence = [
 ];
 
 function setupBrowser() {
-    this.browser = mdns.createBrowser(mdns.tcp('googlecast'), {
-        resolverSequence: sequence
-    });
-    this.browser.on('serviceUp', (service) => {
-        this.addCastItem(service);
-    });
-    this.browser.once('error', this.onBrowserError.bind(this));
-    this.browser.start();
+    try {
+        this.browser = mdns.createBrowser(mdns.tcp('googlecast'), {
+            resolverSequence: sequence
+        });
+        this.browser.on('serviceUp', (service) => {
+            this.addCastItem(service);
+        });
+        this.browser.once('error', onBrowserError.bind(this));
+        this.browser.start();
+    } catch (err) {
+        setTimeout(onBrowserError.bind(this, err), 5000);
+    }
+}
+
+function onBrowserError(err) {
+    debug('mdns browser encountered an error: ' + err);
+    if (this.browser instanceof EventEmitter) {
+        this.browser.removeAllListeners();
+    }
+    this.browser = null;
+    setupBrowser.call(this);
 }
 
 function Manager() {
@@ -32,24 +45,20 @@ function Manager() {
 }
 util.inherits(Manager, EventEmitter);
 
-Manager.prototype.onBrowserError = function (err) {
-    debug('mdns browser encountered an error: ' + err);
-    delete this.browser;
-    setupBrowser.call(this);
-};
+
 
 Manager.prototype.addCastItem = function (service) {
-    debug('found device %s at %s:%d', service.txtRecord.fn, service.addresses[0], service.port);
     var newCastItem = new CastItem(service);
 
     this.insert(newCastItem);
     newCastItem.once('error', (err) => {
         debug(newCastItem.name + ' encountered an error! ' + err);
+        newCastItem.removeAllListeners();
         delete this.items.cc[newCastItem.id];
         try {
             this.browser.start();
         } catch (err) {
-            this.onBrowserError(err);
+            onBrowserError.call(this, err);
         }
     });
     newCastItem.on('castUpdate', (updates) => {
@@ -57,7 +66,12 @@ Manager.prototype.addCastItem = function (service) {
     });
     if (Object.keys(this.items.cc).length >= 4) {
         debug('all chromecasts discovered, stopping browser.');
-        this.browser.stop();
+        try {
+            this.browser.stop();
+        }
+        catch (err) {
+            onBrowserError.call(this, err);
+        }
     }
 };
 
