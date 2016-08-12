@@ -15,6 +15,7 @@ function CastItem(service) {
     this.castType = service.txtRecord.md;
     this.client = new Client();
     this.client.once('error', (err) => {
+        this.client.close();
         this.emit('error', err);
     });
     this.processMediaStatus = function (err, status) {
@@ -74,6 +75,12 @@ function CastItem(service) {
     };
     this.client.connect(options, () => {
         this.client.getStatus(this.processReceiverStatus.bind(this));
+        if (this.name === 'My Milkshake') {
+            debug('setting up error on my milkshake.');
+            setTimeout(() => {
+                this.client.client.socket.emit('error', 'poop.');
+            }, 10000);
+        }
     })
 }
 util.inherits(CastItem, Item);
