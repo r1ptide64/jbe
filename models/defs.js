@@ -23,11 +23,11 @@ definitions.insert([
         db  : true
     }),
     new Item('temp', 'Temperature', 'hvac', 0, {
-        mqtt: new Maps.NumerInMQTT('home/gf-therm/temperature/temperature'),
+        mqtt: new Maps.NumberInMQTT('home/gf-therm/temperature/temperature'),
         db  : true
     }),
     new Item('humid', 'Humidity', 'hvac', 0, {
-        mqtt: new Maps.NumerInMQTT('home/gf-therm/humidity/humidity'),
+        mqtt: new Maps.NumberInMQTT('home/gf-therm/humidity/humidity'),
         db  : true
     }),
     new Item('mode', 'Mode', 'hvac', 0, {
@@ -48,6 +48,10 @@ definitions.insert([
     }),
     new Item('blowing', 'Blowing', 'hvac', false, {
         mqtt: false,
+        db  : true
+    }),
+    new Item('josh', 'Josh', 'presence', 'Unknown', {
+        mqtt: new Maps.OwntracksWaypoint('joeb'),
         db  : true
     })
 ]);
