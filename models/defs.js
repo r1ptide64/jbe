@@ -49,11 +49,12 @@ definitions.insert([
     new Item('blowing', 'Blowing', 'hvac', false, {
         mqtt: false,
         db  : true
-    }),
-    new Item('josh', 'Josh', 'presence', 'Unknown', {
-        mqtt: new Maps.OwntracksWaypoint('joeb'),
-        db  : true
     })
+    // }),
+    // new Item('josh', 'Josh', 'presence', 'Unknown', {
+    //     mqtt: new Maps.OwntracksWaypoint('joeb'),
+    //     db  : true
+    // })
 ]);
 
 module.exports = definitions;
