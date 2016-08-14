@@ -2,6 +2,9 @@
   "name": "jbe",
   "version": "0.0.0",
   "private": true,
+  "config": {
+    "unsafe-perm": true
+  },
   "scripts": {
     "install": "./bin/install.sh",
     "stop": "service jbprd stop",
