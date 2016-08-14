@@ -1,0 +1,13 @@
+[Unit]
+Description=Joe B.'s Home Automation Bus
+After=network.target
+Documentation=https://github.com/r1ptide64/jbe
+
+[Service]
+User=root
+Group=root
+Environment=NODE_ENV=production DEBUG=*
+ExecStart=/usr/bin/node /home/joeb/prd/bin/www.js
+
+[Install]
+WantedBy=multi-user.target
