@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+sudo cp ./bin/jbprd.service /lib/systemd/system/
+sudo systemctl enable jbprd
+sudo service jbprd start

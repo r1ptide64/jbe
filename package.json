@@ -3,10 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "install": "./bin/install.sh",
-    "stop": "service jbprd stop",
-    "restart": "service jbprd restart",
-    "start": "service jbprd start"
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "angular": "^1.5.7",
