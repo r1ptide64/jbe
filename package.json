@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "config": {
-    "unsafe-perm": true
+    "unsafe-perm": true,
+    "user": "root"
   },
   "scripts": {
     "install": "./bin/install.sh",
