@@ -24,9 +24,10 @@ module.exports.OwntracksWaypoint = function (uid) {
     this.in.topic = 'owntracks/' + uid + '/phone/event';
     this.in.fn = function (message) {
         var payload = JSON.parse(message);
+        debug('owntracks waypoint: ' + JSON.stringify(message));
         var retVal = 'Unknown';
-        if (payload && payload._type === 'transition') {
-            if (payload.event === 'enter' && payload.desc) {
+        if (payload._type === 'transition') {
+            if (payload.event === 'enter') {
                 retVal = payload.desc;
             }
         }
