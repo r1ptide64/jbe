@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-sudo cp ./bin/jbdev.service /lib/systemd/system/
-sudo systemctl enable jbdev
-sudo service jbdev start
