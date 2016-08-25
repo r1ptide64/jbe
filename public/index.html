@@ -91,6 +91,11 @@
                             <md-radio-button ng-value=2>AC</md-radio-button>
                         </md-radio-group>
                     </md-list-item>
+                    <md-list-item layout-align="center center">
+                        <p>Override</p>
+                        <md-button class="md-secondary md-raised" ng-click="pulseHvac(true)">Pulse On</md-button>
+                        <md-button class="md-secondary md-raised" ng-click="pulseHvac(false)">Pulse Off</md-button>
+                    </md-list-item>
                 </md-list>
             </md-card-content>
         </md-card>

@@ -237,6 +237,10 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
         socket.emit('command', oneItem);
         console.log('emitted command! oneItem = ' + JSON.stringify(oneItem));
     };
+    $scope.pulseHvac = function (newState) {
+        $scope.items.hvac.blowing.state = newState;
+        $scope.sendCommand($scope.items.hvac.blowing);
+    };
     $scope.hvacModes = ["Off", "Heat", "AC"];
     $scope.toggleExpansion = function (castItem) {
         castItem.expanded = !castItem.expanded;
