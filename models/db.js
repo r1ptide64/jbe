@@ -6,7 +6,8 @@ const dbName = app.isPrd ?
     'prd' :
     'test';
 
-mongoose.connect('mongodb://192.168.1.200:27017/' + dbName);
+debug('opening connection to %s...', dbName);
+mongoose.connect('mongodb://192.168.1.200/' + dbName);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error: '));
 db.once('open', debug.bind(debug, 'connected to database!'));
