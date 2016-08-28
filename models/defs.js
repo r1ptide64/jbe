@@ -34,9 +34,13 @@ definitions.insert([
         mqtt: false,
         db  : true
     }),
-    new Item('setpoint', 'Setpoint', 'hvac', 72.5, {
+    new Item('setpoint', 'Setpoint (home)', 'hvac', 72.5, {
         mqtt: false,
         db  : true
+    }),
+    new Item('awaySetpoint', 'Setpoint (away)', 'hvac', 72.5, {
+        mqtt: false,
+        db: true
     }),
     new Item('AC', 'AC', 'hvac', false, {
         mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/gf-therm/AC/on'),
