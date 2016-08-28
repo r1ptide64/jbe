@@ -1,14 +1,20 @@
-var mongoose = require('mongoose');
-var debug = require('debug')('jbe:db');
+var mongoose = require('mongoose'),
+    debug    = require('debug')('jbe:db'),
+    app      = require('../app');
 
-mongoose.connect('mongodb://127.0.0.1:27017/test');
+const dbName = app.isPrd ?
+    'prd' :
+    'test';
+
+debug('opening connection to %s...', dbName);
+mongoose.connect('mongodb://192.168.1.200/' + dbName);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error: '));
 db.once('open', debug.bind(debug, 'connected to database!'));
 
 var ItemSchema = mongoose.Schema({
-    _id: String,
-    state: mongoose.Schema.Types.Mixed,
+    _id       : String,
+    state     : mongoose.Schema.Types.Mixed,
     lastChange: Date,
     lastUpdate: Date
 });
@@ -23,8 +29,8 @@ function DB(item) {
         }
         else if (doc === null) {
             doc = new ItemModel({
-                _id: item.id,
-                state: item.state,
+                _id       : item.id,
+                state     : item.state,
                 lastUpdate: item.lastUpdate,
                 lastChange: item.lastChange
             });
