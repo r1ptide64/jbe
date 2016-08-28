@@ -40,11 +40,7 @@ definitions.insert([
     }),
     new Item('awaySetpoint', 'Setpoint (away)', 'hvac', 72.5, {
         mqtt: false,
-        db  : true
-    }),
-    new Item('comingHome', 'Coming Home', 'hvac', false, {
-        mqtt: false,
-        db  : true
+        db: true
     }),
     new Item('AC', 'AC', 'hvac', false, {
         mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/gf-therm/AC/on'),
@@ -58,11 +54,11 @@ definitions.insert([
         mqtt: false,
         db  : true
     }),
-    new Item('josh', 'Josh', 'presence', 'Away', {
-        db  : true,
-        ping: '192.168.1.220'
+    new Item('josh', 'Josh', 'presence', 'Home', {
+        mqtt: new Maps.OwntracksWaypoint('joeb'),
+        db  : true
     }),
-    new Item('chelsea', 'Chelsea', 'presence', 'Unknown', {
+    new Item('chelsea', 'Chelsea', 'presence', 'Home', {
         mqtt: new Maps.OwntracksWaypoint('wheezy'),
         db  : true
     })

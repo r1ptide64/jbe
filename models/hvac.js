@@ -32,6 +32,10 @@ var getCurrentSetpoint = function () {
     return retVal.state;
 };
 
+var getCurrentSetpoint = function () {
+
+};
+
 var processTemperatureChange = function () {
     var setpoint = getCurrentSetpoint();
     var currTemp = hvac.temp.state;
