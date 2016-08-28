@@ -9,6 +9,10 @@ const MIN_CYCLE_LENGTH = isPrd
     : 20 * 1000;
 const TEMP_WINDOW = 1;
 
+var getCurrentSetpoint = function () {
+
+};
+
 var processTemperatureChange = function () {
     var setpoint = hvac.setpoint.state;
     var currTemp = hvac.temp.state;

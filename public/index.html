@@ -75,8 +75,17 @@
                     </md-list-item>
                     <md-divider></md-divider>
                     <md-list-item>
-                        <p>Setpoint</p>
+                        <p>Setpoint (home)</p>
                         <md-select ng-model="items.hvac.setpoint.state" md-on-close="sendCommand(items.hvac.setpoint)">
+                            <md-option ng-value="setpoint" ng-repeat="setpoint in setpointAry">
+                                {{setpoint}}
+                            </md-option>
+                        </md-select>
+                    </md-list-item>
+                    <md-list-item>
+                        <p>Setpoint (away)</p>
+                        <md-select ng-model="items.hvac.awaySetpoint.state"
+                                   md-on-close="sendCommand(items.hvac.awaySetpoint)">
                             <md-option ng-value="setpoint" ng-repeat="setpoint in setpointAry">
                                 {{setpoint}}
                             </md-option>
