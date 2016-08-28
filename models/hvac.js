@@ -10,11 +10,25 @@ const MIN_CYCLE_LENGTH = isPrd
 const TEMP_WINDOW = 1;
 
 var getCurrentSetpoint = function () {
-
+    var retVal = hvac.setpoint;
+    var presence = app.manager.items.presence;
+    if (presence !== undefined) {
+        if (presence.josh && presence.chelsea) {
+            if (presence.josh.state && presence.chelsea.state) {
+                if (presence.josh.state !== 'Home' && presence.chelsea.state !== 'Home') {
+                    retVal = hvac.awaySetpoint;
+                }
+            }
+        }
+    }
+    debug('current setpoint = %d (%s)', retVal.state, retVal === hvac.awaySetpoint
+        ? 'away'
+        : 'home');
+    return retVal.state;
 };
 
 var processTemperatureChange = function () {
-    var setpoint = hvac.setpoint.state;
+    var setpoint = getCurrentSetpoint();
     var currTemp = hvac.temp.state;
     var currMode = hvac.mode.state;
     var blowing = hvac.blowing;
@@ -54,6 +68,7 @@ var processTemperatureChange = function () {
 
 hvac.temp.on('update', processTemperatureChange);
 hvac.setpoint.on('update', processTemperatureChange);
+hvac.awaySetpoint.on('update', processTemperatureChange);
 hvac.mode.on('update', processTemperatureChange);
 
 hvac.blowing.on('update', function (newState) {

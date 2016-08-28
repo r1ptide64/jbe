@@ -54,11 +54,11 @@ definitions.insert([
         mqtt: false,
         db  : true
     }),
-    new Item('josh', 'Josh', 'presence', 'Home', {
+    new Item('josh', 'Josh', 'presence', 'Unknown', {
         mqtt: new Maps.OwntracksWaypoint('joeb'),
         db  : true
     }),
-    new Item('chelsea', 'Chelsea', 'presence', 'Home', {
+    new Item('chelsea', 'Chelsea', 'presence', 'Unknown', {
         mqtt: new Maps.OwntracksWaypoint('wheezy'),
         db  : true
     })
