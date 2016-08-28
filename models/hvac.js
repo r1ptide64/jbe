@@ -33,7 +33,21 @@ var getCurrentSetpoint = function () {
 };
 
 var getCurrentSetpoint = function () {
-
+    var retVal = hvac.setpoint;
+    var presence = app.manager.items.presence;
+    if (presence !== undefined) {
+        if (presence.josh && presence.chelsea) {
+            if (presence.josh.state && presence.chelsea.state) {
+                if (presence.josh.state !== 'Home' && presence.chelsea.state !== 'Home') {
+                    retVal = hvac.awaySetpoint;
+                }
+            }
+        }
+    }
+    debug('current setpoint = %d (%s)', retVal.state, retVal === hvac.awaySetpoint
+        ? 'away'
+        : 'home');
+    return retVal.state;
 };
 
 var processTemperatureChange = function () {
