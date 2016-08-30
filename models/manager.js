@@ -38,6 +38,7 @@ function onBrowserError(err) {
 }
 
 function Manager() {
+    debug('creating Manager()');
     this.items = {};
     this.items.cc = {};
     EventEmitter.call(this);
@@ -48,9 +49,22 @@ util.inherits(Manager, EventEmitter);
 
 
 Manager.prototype.addCastItem = function (service) {
+    // validate input
+    if (!service || !Array.isArray(service.addresses) || !service.port || !service.txtRecord) {
+        debug('attempt to create CastItem from bad service.');
+        return;
+    }
+
+    // check for duplicates
+    if (this.items.cc[service.addresses[0] + ':' + service.port]) {
+        debug('duplicate CastItem found.');
+        return;
+    }
+
     var newCastItem = new CastItem(service);
 
     this.insert(newCastItem);
+    debug('inserting CastItem %s', newCastItem.name);
     newCastItem.once('error', (err) => {
         debug(newCastItem.name + ' encountered an error! ' + err);
         newCastItem.removeAllListeners();
@@ -64,15 +78,15 @@ Manager.prototype.addCastItem = function (service) {
     newCastItem.on('castUpdate', (updates) => {
         this.emit('castUpdate', newCastItem.id, updates);
     });
-    if (Object.keys(this.items.cc).length >= 4) {
-        debug('all chromecasts discovered, stopping browser.');
-        try {
-            this.browser.stop();
-        }
-        catch (err) {
-            onBrowserError.call(this, err);
-        }
-    }
+    // if (Object.keys(this.items.cc).length >= 4) {
+    //     debug('all chromecasts discovered, stopping browser.');
+    //     try {
+    //         browser.stop();
+    //     }
+    //     catch (err) {
+    //         onBrowserError.call(this, err);
+    //     }
+    // }
 };
 
 Manager.prototype.castCmd = function (cmdData) {
