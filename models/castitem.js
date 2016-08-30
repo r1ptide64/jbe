@@ -6,11 +6,6 @@ var Item                 = require('./item'),
     debug                = require('debug')('jbe:castitem');
 
 function CastItem(service) {
-    // validate parameter
-    if (!service || !Array.isArray(service.addresses) || !service.port || !service.txtRecord) {
-        return;
-    }
-
     Item.call(this, service.addresses[0] + ':' + service.port, service.txtRecord.fn, 'cc');
     this.castType = service.txtRecord.md;
     this.client = new Client();
