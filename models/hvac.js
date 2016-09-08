@@ -7,7 +7,7 @@ var hvac = app.manager.items.hvac;
 const MIN_CYCLE_LENGTH = isPrd
     ? 5 * 60 * 1000
     : 20 * 1000;
-const TEMP_WINDOW = 1;
+const TEMP_WINDOW      = 0.5;
 
 var getCurrentSetpoint = function () {
     var retVal = hvac.setpoint;
