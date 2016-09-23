@@ -16,7 +16,9 @@ var getCurrentSetpoint = function () {
         if (presence.josh && presence.chelsea) {
             if (presence.josh.state && presence.chelsea.state) {
                 if (presence.josh.state !== 'Home' && presence.chelsea.state !== 'Home') {
-                    retVal = hvac.awaySetpoint;
+                    if (hvac.comingHome && !hvac.comingHome.state) {
+                        retVal = hvac.awaySetpoint;
+                    }
                 }
             }
         }
@@ -70,6 +72,14 @@ hvac.temp.on('update', processTemperatureChange);
 hvac.setpoint.on('update', processTemperatureChange);
 hvac.awaySetpoint.on('update', processTemperatureChange);
 hvac.mode.on('update', processTemperatureChange);
+
+hvac.comingHome.on('update', (newState) => {
+    debug(`coming home updated to ${newState}`);
+    if (!newState) {
+        return;
+    }
+
+});
 
 hvac.blowing.on('update', function (newState) {
     var debug = require('debug')('jbe:blowing');

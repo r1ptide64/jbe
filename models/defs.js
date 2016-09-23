@@ -42,6 +42,10 @@ definitions.insert([
         mqtt: false,
         db: true
     }),
+    new Item('comingHome', 'Coming Home', 'hvac', false, {
+        mqtt: false,
+        db: true
+    }),
     new Item('AC', 'AC', 'hvac', false, {
         mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/gf-therm/AC/on'),
         db  : true
