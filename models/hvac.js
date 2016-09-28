@@ -10,16 +10,19 @@ const MIN_CYCLE_LENGTH = isPrd
 const TEMP_WINDOW      = 0.5;
 
 var getCurrentSetpoint = function () {
-    var retVal = hvac.setpoint;
-    var presence = app.manager.items.presence;
-    if (presence !== undefined) {
-        if (presence.josh && presence.chelsea) {
-            if (presence.josh.state && presence.chelsea.state) {
+    var retVal     = hvac.setpoint;
+    var comingHome = hvac.comingHome;
+    var presence   = app.manager.items.presence;
+
+    if (!(comingHome && comingHome.state)) {
+        if (presence !== undefined) {
+            if (presence.josh && presence.chelsea) {
                 if (presence.josh.state !== 'Home' && presence.chelsea.state !== 'Home') {
                     if (hvac.comingHome && !hvac.comingHome.state) {
                         retVal = hvac.awaySetpoint;
                     }
                 }
+
             }
         }
     }
@@ -73,13 +76,18 @@ hvac.setpoint.on('update', processTemperatureChange);
 hvac.awaySetpoint.on('update', processTemperatureChange);
 hvac.mode.on('update', processTemperatureChange);
 
-hvac.comingHome.on('update', (newState) => {
-    debug(`coming home updated to ${newState}`);
-    if (!newState) {
+function resetComingHome(newState) {
+    if (newState !== 'Home') {
         return;
     }
+    hvac.comingHome.setState(false, 'presence');
+}
 
-});
+var presence = app.manager.items.presence;
+if (presence) {
+    presence.josh.on('update', resetComingHome);
+    presence.chelsea.on('update', resetComingHome);
+}
 
 hvac.blowing.on('update', function (newState) {
     var debug = require('debug')('jbe:blowing');
