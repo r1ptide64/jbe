@@ -100,6 +100,11 @@
                             <md-radio-button ng-value=2>AC</md-radio-button>
                         </md-radio-group>
                     </md-list-item>
+                    <md-list-item ng-click="toggleSwitch(items.hvac.comingHome)">
+                        <p>Coming Home</p>
+                        <md-switch class="md-secondary" ng-model="items.hvac.comingHome.state"
+                                   ng-change="sendCommand(items.hvac.comingHome)"></md-switch>
+                    </md-list-item>
                     <md-list-item layout-align="center center">
                         <p>Override</p>
                         <md-button class="md-secondary md-raised" ng-click="pulseHvac(true)">Pulse On</md-button>
