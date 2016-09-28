@@ -120,6 +120,9 @@ Manager.prototype.insert = function (items) {
                 source: source
             });
         });
+        item.on('error', (err) => {
+            debug(`${item.name} encountered an error! ${err}`);
+        });
     });
 };
 

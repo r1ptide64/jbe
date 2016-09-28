@@ -5,7 +5,7 @@ var IO      = require('socket.io'),
 function Socket(server) {
     debug('socket server established.');
     var io = IO(server);
-    // manager.on('change', io.emit.bind(io, 'change'));
+    manager.on('change', io.emit.bind(io, 'change'));
     manager.on('castUpdate', io.emit.bind(io, 'castUpdate'));
     io.on('connection', onConnection);
 };
