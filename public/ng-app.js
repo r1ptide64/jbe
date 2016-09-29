@@ -30,8 +30,8 @@ joebApp.factory('socket', ['$rootScope', function ($rootScope) {
     };
 }]);
 
-joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket', function ($scope, $timeout, $interval, socket) {
-    var cli2item = function (slimItem) {
+joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket', '$mdToast', function ($scope, $timeout, $interval, socket, $mdToast) {
+    var cli2item               = function (slimItem) {
         console.log('cli2item, slimitem = ' + JSON.stringify(slimItem));
         function findItem(oneItem) {
             return oneItem.id == slimItem.id;
@@ -53,7 +53,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
     };
 
     function zorba() {
-        var now = new Date();
+        var now  = new Date();
         var dofw = now.getDay();
         if (dofw !== 6) {
             now.setDate(now.getDate() - (dofw + 1));
@@ -72,7 +72,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
         }
         return 'http://podcast.wpr.org/zph/zph' + year + month + date + '.mp3';
     };
-    $scope.customCastMedia = [
+    $scope.customCastMedia  = [
         {
             contentId  : 'http://wpr-ice.streamguys.net/wpr-ideas-mp3-64',
             contentType: 'audio/mpeg',
@@ -94,8 +94,19 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
             }
         }
     ];
-    $scope.setpointAry = makePotentialSetpoints(55, 0.5, 85);
-    $scope.socket = socket;
+    var connectionDiedToast = $mdToast.simple()
+        .textContent('Connection Lost')
+        .action().highlightAction().highlightClass()
+        .capsule()
+        .theme();
+    //.toastClass('md-warn');
+    var openToast           = function ($event) {
+        $mdToast.show(connectionDiedToast);
+    };
+    $scope.setpointAry      = makePotentialSetpoints(55, 0.5, 85);
+    $scope.socket           = socket;
+    socket.on('disconnect', openToast);
+    socket.on('reconnect', $mdToast.hide);
     socket.on('init', function (items) {
         console.log(items);
         $scope.items = items;
@@ -114,7 +125,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
                         $timeout.cancel(timeoutInstance);
                     }
                     timeoutInstance = $timeout(() => {
-                        $scope.castCmd(oneCastItem, 'setVolume', { level: newVal });
+                        $scope.castCmd(oneCastItem, 'setVolume', {level: newVal});
                     }, 150);
                 }
             });
@@ -177,7 +188,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
     function durationFormatter(sec_num) {
         sec_num = parseInt(sec_num, 10);
         if (isNaN(sec_num)) sec_num = 0;
-        var hours = Math.trunc(sec_num / 3600);
+        var hours   = Math.trunc(sec_num / 3600);
         var minutes = Math.trunc((sec_num - (hours * 3600)) / 60);
         var seconds = sec_num - (hours * 3600) - (minutes * 60);
 
@@ -192,7 +203,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
         }
         return hours + ':' + minutes + ':' + seconds;
     };
-    $scope.castDuration = function (castItem) {
+    $scope.castDuration    = function (castItem) {
         if (!castItem || !castItem.media) {
             return '';
         }
@@ -208,40 +219,40 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
         }
         return durationFormatter(currentTime);
     };
-    $scope.toggleMute = function (castItem) {
-        var muted = !castItem.receiverStatus.volume.muted;
+    $scope.toggleMute      = function (castItem) {
+        var muted                            = !castItem.receiverStatus.volume.muted;
         castItem.receiverStatus.volume.muted = muted;
-        $scope.castCmd(castItem, 'setVolume', { muted: muted });
+        $scope.castCmd(castItem, 'setVolume', {muted: muted});
     };
-    $scope.castPlayPause = function (castItem) {
+    $scope.castPlayPause   = function (castItem) {
 
     };
     $scope.playCustomMedia = function (castItem, media) {
         $scope.castCmd(castItem, 'playCustomMedia', media);
     };
-    $scope.stopCasting = function (castItem) {
+    $scope.stopCasting     = function (castItem) {
         $scope.castCmd(castItem, "stopCasting");
     }
-    $scope.castCmd = function (castItem, command, params) {
+    $scope.castCmd         = function (castItem, command, params) {
         socket.emit('castCmd', {
             command: command,
             id     : castItem.id,
             params : params
         });
     };
-    $scope.toggleSwitch = function (theSwitch) {
+    $scope.toggleSwitch    = function (theSwitch) {
         theSwitch.state = !theSwitch.state;
         $scope.sendCommand(theSwitch);
     };
-    $scope.sendCommand = function (oneItem) {
+    $scope.sendCommand     = function (oneItem) {
         socket.emit('command', oneItem);
         console.log('emitted command! oneItem = ' + JSON.stringify(oneItem));
     };
-    $scope.pulseHvac = function (newState) {
+    $scope.pulseHvac       = function (newState) {
         $scope.items.hvac.blowing.state = newState;
         $scope.sendCommand($scope.items.hvac.blowing);
     };
-    $scope.hvacModes = ["Off", "Heat", "AC"];
+    $scope.hvacModes       = ["Off", "Heat", "AC"];
     $scope.toggleExpansion = function (castItem) {
         castItem.expanded = !castItem.expanded;
     }

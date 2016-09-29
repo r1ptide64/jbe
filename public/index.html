@@ -21,7 +21,6 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="ng-app.js"></script>
 </head>
-
 <body ng-app="joebApp">
 <div ng-controller="joebController">
     <div layout="column" layout-fill>
@@ -35,24 +34,7 @@
             </div>
         </md-toolbar>
     </div>
-    <md-content layout-xs="column" layout="row" layout-wrap layout-align="space-around">
-        <md-card flex="auto">
-            <md-card-title>
-                <md-card-title-text>
-                    <span class="md-headline">Switches</span>
-                </md-card-title-text>
-            </md-card-title>
-            <md-card-content layout="column">
-                <md-list>
-                    <md-list-item ng-repeat="switch in items.switch" ng-click="toggleSwitch(switch)">
-                        <md-icon>lightbulb_outline</md-icon>
-                        <p>{{switch.name}}</p>
-                        <md-switch class="md-secondary" ng-model="switch.state"
-                                   ng-change="sendCommand(switch)"></md-switch>
-                    </md-list-item>
-                </md-list>
-            </md-card-content>
-        </md-card>
+    <md-content layout-xs="column" layout="row" layout-wrap layout-align="space-around start">
         <md-card flex="auto">
             <md-card-title>
                 <md-card-title-text>
@@ -109,29 +91,6 @@
                         <p>Override</p>
                         <md-button class="md-secondary md-raised" ng-click="pulseHvac(true)">Pulse On</md-button>
                         <md-button class="md-secondary md-raised" ng-click="pulseHvac(false)">Pulse Off</md-button>
-                    </md-list-item>
-                </md-list>
-            </md-card-content>
-        </md-card>
-        <md-card flex="auto">
-            <md-card-title>
-                <md-card-title-text>
-                    <span class="md-headline">Presence</span>
-                </md-card-title-text>
-            </md-card-title>
-            <md-card-content layout="column">
-                <md-list flex>
-                    <md-list-item>
-                        <p>Josh</p>
-                        <span class="md-secondary">
-                                {{items.presence.josh.state}}
-                            </span>
-                    </md-list-item>
-                    <md-list-item>
-                        <p>Chelsea</p>
-                        <span class="md-secondary">
-                                {{items.presence.chelsea.state}}
-                            </span>
                     </md-list-item>
                 </md-list>
             </md-card-content>
@@ -207,79 +166,51 @@
                         </div>
                         <md-divider ng-show="castItem.expanded"></md-divider>
                     </div>
-                    <!--<md-list-item class="md-2-line" ng-click="toggleExpansion()">
-                        <md-icon>video_library</md-icon>
-                        <div class="md-list-item-text">
-                            <h3>Couch Potatoes by Bittman</h3>
-                            <p>Inactive</p>
-                        </div>
-                    </md-list-item>
-                    <div ng-show="isExpanded" layout="row" layout-align="center">
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>skip_previous</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>play_arrow</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>skip_next</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>volume_up</md-icon>
-                        </md-button>
-                    </div>
-                    <md-list-item class="md-2-line" ng-click="toggleExpansion()">
-                        <md-icon>video_library</md-icon>
-                        <div class="md-list-item-text">
-                            <h3>Couch Potatoes by Bittman</h3>
-                            <p>Inactive</p>
-                        </div>
-                    </md-list-item>
-                    <div ng-show="isExpanded" layout="row" layout-align="center">
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>skip_previous</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>play_arrow</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>skip_next</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>volume_up</md-icon>
-                        </md-button>
-                    </div>
-                    <md-list-item class="md-2-line" ng-click="toggleExpansion()">
-                        <md-icon>video_library</md-icon>
-                        <div class="md-list-item-text">
-                            <h3>Couch Potatoes by Bittman</h3>
-                            <p>Inactive</p>
-                        </div>
-                    </md-list-item>
-                    <div ng-show="isExpanded" layout="row" layout-align="center">
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>skip_previous</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>play_arrow</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>skip_next</md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button" aria-label="Custom Icon Button">
-                            <md-icon>volume_up</md-icon>
-                        </md-button>
-                    </div>-->
                 </md-list>
             </md-card-content>
         </md-card>
-        <md-card>
-            <md-card-title>
-                <md-card-title-text>
-                    <span class="md-headline">Chores</span>
-                </md-card-title-text>
-            </md-card-title>
-        </md-card>
+        <div>
+            <md-card flex="auto">
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">Switches</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-content layout="column">
+                    <md-list>
+                        <md-list-item ng-repeat="switch in items.switch" ng-click="toggleSwitch(switch)">
+                            <md-icon>lightbulb_outline</md-icon>
+                            <p>{{switch.name}}</p>
+                            <md-switch class="md-secondary" ng-model="switch.state"
+                                       ng-change="sendCommand(switch)"></md-switch>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
+            </md-card>
+            <md-card flex="auto">
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">Presence</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-content layout="column">
+                    <md-list flex>
+                        <md-list-item>
+                            <p>Josh</p>
+                            <span class="md-secondary">
+                                {{items.presence.josh.state}}
+                            </span>
+                        </md-list-item>
+                        <md-list-item>
+                            <p>Chelsea</p>
+                            <span class="md-secondary">
+                                {{items.presence.chelsea.state}}
+                            </span>
+                        </md-list-item>
+                    </md-list>
+                </md-card-content>
+            </md-card>
+        </div>
     </md-content>
 </div>
 </body>
