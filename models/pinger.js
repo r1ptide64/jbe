@@ -27,7 +27,7 @@ const setPingInterval = function setPingInterval(item, ipAddr) {
     (function ping() {
         debug(`executing ping on ${item.name}`);
         exec(command, (err, stdout) => {
-            if (err) {
+            if (err && err.code !== 1) {
                 item.emit(err);
                 return;
             }
