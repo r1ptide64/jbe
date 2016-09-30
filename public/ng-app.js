@@ -72,7 +72,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
         }
         return 'http://podcast.wpr.org/zph/zph' + year + month + date + '.mp3';
     };
-    $scope.customCastMedia  = [
+    $scope.customCastMedia = [
         {
             contentId  : 'http://wpr-ice.streamguys.net/wpr-ideas-mp3-64',
             contentType: 'audio/mpeg',
@@ -94,19 +94,28 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
             }
         }
     ];
-    var connectionDiedToast = $mdToast.simple()
-        .textContent('Connection Lost')
-        .action().highlightAction().highlightClass()
-        .capsule()
-        .theme();
-    //.toastClass('md-warn');
-    var openToast           = function ($event) {
-        $mdToast.show(connectionDiedToast);
+
+    var onDisconnect   = function ($event) {
+        $mdToast.show({
+            template  : '<md-toast class="md-warn">' +
+            '<div class="md-toast-content">' +
+            'Connection lost' +
+            '</div>' +
+            '</md-toast>',
+            hideDelay : false,
+            position  : 'bottom right',
+            toastClass: 'md-warn'
+        });
+        $scope.connected = false;
     };
-    $scope.setpointAry      = makePotentialSetpoints(55, 0.5, 85);
-    $scope.socket           = socket;
-    socket.on('disconnect', openToast);
-    socket.on('reconnect', $mdToast.hide);
+    $scope.connected   = false;
+    $scope.setpointAry = makePotentialSetpoints(55, 0.5, 85);
+    $scope.socket      = socket;
+    socket.on('disconnect', onDisconnect);
+    socket.on('reconnect', () => {
+        $mdToast.hide;
+        $scope.connected = true;
+    });
     socket.on('init', function (items) {
         console.log(items);
         $scope.items = items;
@@ -130,7 +139,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
                 }
             });
         });
-
+        $scope.connected = true;
         // var timeoutInstance;
         // $scope.$watch('items.hvac.setpoint.state', function (newVal, oldVal) {
         //
