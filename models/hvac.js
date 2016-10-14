@@ -2,7 +2,7 @@ var app   = require('../app'),
     debug = require('debug')('jbe:hvac');
 
 var isPrd = app.isPrd;
-var hvac = app.manager.items.hvac;
+var hvac  = app.manager.items.hvac;
 
 const MIN_CYCLE_LENGTH = isPrd
     ? 5 * 60 * 1000
@@ -32,29 +32,11 @@ var getCurrentSetpoint = function () {
     return retVal.state;
 };
 
-var getCurrentSetpoint = function () {
-    var retVal = hvac.setpoint;
-    var presence = app.manager.items.presence;
-    if (presence !== undefined) {
-        if (presence.josh && presence.chelsea) {
-            if (presence.josh.state && presence.chelsea.state) {
-                if (presence.josh.state !== 'Home' && presence.chelsea.state !== 'Home') {
-                    retVal = hvac.awaySetpoint;
-                }
-            }
-        }
-    }
-    debug('current setpoint = %d (%s)', retVal.state, retVal === hvac.awaySetpoint
-        ? 'away'
-        : 'home');
-    return retVal.state;
-};
-
 var processTemperatureChange = function () {
     var setpoint = getCurrentSetpoint();
     var currTemp = hvac.temp.state;
     var currMode = hvac.mode.state;
-    var blowing = hvac.blowing;
+    var blowing  = hvac.blowing;
     if (setpoint === undefined || currTemp === undefined) {
         console.error('critical value undefined!');
         return;
@@ -108,10 +90,10 @@ if (presence) {
 }
 
 hvac.blowing.on('update', function (newState) {
-    var debug = require('debug')('jbe:blowing');
+    var debug    = require('debug')('jbe:blowing');
     var currMode = hvac.mode.state;
-    var ac = hvac.AC;
-    var heat = hvac.heat;
+    var ac       = hvac.AC;
+    var heat     = hvac.heat;
     switch (currMode) {
         case 1:
             debug('heat mode, turning heat to ' + newState);
