@@ -7,7 +7,9 @@ var Item         = require('./item.js'),
 
 var sequence = [
     mdns.rst.DNSServiceResolve(),
-    'DNSServiceGetAddrInfo' in mdns.dns_sd ? mdns.rst.DNSServiceGetAddrInfo() : mdns.rst.getaddrinfo({
+    'DNSServiceGetAddrInfo' in mdns.dns_sd
+        ? mdns.rst.DNSServiceGetAddrInfo()
+        : mdns.rst.getaddrinfo({
         families: [4]
     }),
     mdns.rst.makeAddressesUnique()
@@ -39,13 +41,12 @@ function onBrowserError(err) {
 
 function Manager() {
     debug('creating Manager()');
-    this.items = {};
+    this.items    = {};
     this.items.cc = {};
     EventEmitter.call(this);
     setupBrowser.call(this);
 }
 util.inherits(Manager, EventEmitter);
-
 
 
 Manager.prototype.addCastItem = function (service) {
@@ -56,7 +57,7 @@ Manager.prototype.addCastItem = function (service) {
     }
 
     // check for duplicates
-    if (this.items.cc[service.addresses[0] + ':' + service.port]) {
+    if (this.items.cc[service.txtRecord.fn]) {
         debug('duplicate CastItem found.');
         return;
     }
@@ -145,7 +146,7 @@ Manager.prototype.dumpToClient = function () {
     Object.keys(this.items).forEach((itemType) => {
         retObj[itemType] = {};
         Object.keys(this.items[itemType]).forEach((itemId) => {
-            var item = this.items[itemType][itemId];
+            var item                 = this.items[itemType][itemId];
             retObj[itemType][itemId] = {
                 id   : item.id,
                 name : item.name,

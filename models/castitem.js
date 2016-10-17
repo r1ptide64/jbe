@@ -6,7 +6,7 @@ var Item                 = require('./item'),
     debug                = require('debug')('jbe:castitem');
 
 function CastItem(service) {
-    Item.call(this, service.addresses[0] + ':' + service.port, service.txtRecord.fn, 'cc');
+    Item.call(this, service.txtRecord.fn, service.txtRecord.fn, 'cc');
     this.castType = service.txtRecord.md;
     this.client = new Client();
     this.client.once('error', (err) => {
