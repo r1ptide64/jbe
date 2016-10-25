@@ -70,7 +70,7 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
         if (date < 10) {
             date = '0' + date;
         }
-        return 'http://podcast.wpr.org/zph/zph' + year + month + date + '.mp3';
+        return 'http://podcast.wpr.org/zph/zph' + year + month + date + 'z.mp3';
     };
     $scope.customCastMedia = [
         {
@@ -106,16 +106,15 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
             position  : 'bottom right',
             toastClass: 'md-warn'
         });
-        $scope.connected = false;
     };
-    $scope.connected   = false;
+    var onConnect      = function () {
+        $mdToast.hide();
+    };
     $scope.setpointAry = makePotentialSetpoints(55, 0.5, 85);
     $scope.socket      = socket;
     socket.on('disconnect', onDisconnect);
-    socket.on('reconnect', () => {
-        $mdToast.hide;
-        $scope.connected = true;
-    });
+    socket.on('reconnect', onConnect);
+    socket.on('connect', onConnect);
     socket.on('init', function (items) {
         console.log(items);
         $scope.items = items;
@@ -140,10 +139,6 @@ joebApp.controller("joebController", ['$scope', '$timeout', '$interval', 'socket
             });
         });
         $scope.connected = true;
-        // var timeoutInstance;
-        // $scope.$watch('items.hvac.setpoint.state', function (newVal, oldVal) {
-        //
-        // });
     });
     socket.on('change', function (slimItem) {
         console.log('change, slimItem = ' + JSON.stringify(slimItem));
