@@ -59,9 +59,8 @@ definitions.insert([
         db  : true
     }),
     new Item('josh', 'Josh', 'presence', 'Away', {
-        //mqtt: new Maps.OwntracksWaypoint('joeb'),
-        db  : true,
-        ping: '192.168.1.220'
+        mqtt: new Maps.OwntracksWaypoint('joeb'),
+        db  : true
     }),
     new Item('chelsea', 'Chelsea', 'presence', 'Unknown', {
         mqtt: new Maps.OwntracksWaypoint('wheezy'),
