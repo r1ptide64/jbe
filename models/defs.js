@@ -22,6 +22,10 @@ definitions.insert([
         mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/lf-bath/light/on'),
         db  : true
     }),
+    new Item('xmasLight', 'Christmas Lights', 'switch', false, {
+        mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/xmas-light/light/on'),
+        db  : true
+    }),
     new Item('temp', 'Temperature', 'hvac', 0, {
         mqtt: new Maps.NumberInMQTT('home/gf-therm/temperature/temperature'),
         db  : true

@@ -1,18 +1,20 @@
-﻿var SunCalc = require('suncalc');
+﻿var SunCalc  = require('suncalc');
 var schedule = require('node-schedule');
-var app = require('../app');
-var isPrd = true; //app.get('env') === 'production';
-var debug = require('debug')('jbe:suntime');
-var CastItem = require('./castitem');
+var app      = require('../app');
+var isPrd    = true; //app.get('env') === 'production';
+var debug    = require('debug')('jbe:suntime');
 
 
 var sunFunction = function (newState) {
     var debugStr = 'The sun has ';
-    debugStr += newState ?
-        'set.' :
-        'risen.';
+    debugStr += newState
+        ?
+                'set.'
+        :
+                'risen.';
     debug(debugStr);
     app.manager.items.switch.porchLight.setState(newState, 'suntime');
+    app.manager.items.switch.xmasLight.setState(newState, 'suntime');
 };
 
 function CalculateSunset() {
@@ -24,7 +26,7 @@ function CalculateSunset() {
         sunset : new Date(Date.now() + 10 * 1000)
     };
     debug('times = ' + JSON.stringify(times));
-    schedule.scheduleJob(times.sunrise, sunFunction.bind(sunFunction, false)); // function () { sunFunction(false); });
+    schedule.scheduleJob(times.sunrise, sunFunction.bind(sunFunction, false));
     schedule.scheduleJob(times.sunset, sunFunction.bind(sunFunction, true));
 };
 
