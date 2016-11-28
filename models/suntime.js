@@ -13,7 +13,7 @@ var sunFunction = function (newState) {
         :
                 'risen.';
     debug(debugStr);
-    app.manager.items.switch.porchLight.setState(newState, 'suntime');
+    //app.manager.items.switch.porchLight.setState(newState, 'suntime');
     app.manager.items.switch.xmasLight.setState(newState, 'suntime');
 };
 
