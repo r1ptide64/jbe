@@ -1,4 +1,4 @@
-var ret;
+var ret = {};
 
 try {
     var mdns         = require('mdns');
@@ -16,10 +16,12 @@ try {
         mdns.rst.makeAddressesUnique()
     ];
 
-    ret = setupBrowser;
+    ret.setupBrowser   = setupBrowser;
+    ret.onBrowserError = onBrowserError;
 }
 catch (err) {
-    ret = dummy;
+    ret.setupBrowser   = dummy;
+    ret.onBrowserError = dummy;
 }
 
 function dummy() {

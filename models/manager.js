@@ -2,7 +2,7 @@ var Item         = require('./item.js'),
     util         = require('util'),
     EventEmitter = require('events').EventEmitter,
     debug        = require('debug')('jbe:manager'),
-    setupBrowser = require('./browser.js'),
+    browser      = require('./browser.js'),
     CastItem     = require('./castitem');
 
 
@@ -11,7 +11,7 @@ function Manager() {
     this.items    = {};
     this.items.cc = {};
     EventEmitter.call(this);
-    setupBrowser.call(this);
+    browser.setupBrowser.call(this);
 }
 
 util.inherits(Manager, EventEmitter);
@@ -41,7 +41,7 @@ Manager.prototype.addCastItem = function (service) {
         try {
             this.browser.start();
         } catch (err) {
-            onBrowserError.call(this, err);
+            browser.onBrowserError.call(this, err);
         }
     });
     newCastItem.on('castUpdate', (updates) => {
