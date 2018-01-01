@@ -8,10 +8,8 @@ var debug    = require('debug')('jbe:suntime');
 var sunFunction = function (newState) {
     var debugStr = 'The sun has ';
     debugStr += newState
-        ?
-                'set.'
-        :
-                'risen.';
+        ? 'set.'
+        : 'risen.';
     debug(debugStr);
     app.manager.items.switch.porchLight.setState(newState, 'suntime');
     //app.manager.items.switch.xmasLight.setState(newState, 'suntime');
@@ -22,9 +20,9 @@ function CalculateSunset() {
     var times = isPrd
         ? SunCalc.getTimes(Date.now(), 43.003852, -89.5107942)
         : {
-        sunrise: new Date(Date.now() + 5 * 1000),
-        sunset : new Date(Date.now() + 10 * 1000)
-    };
+            sunrise: new Date(Date.now() + 5 * 1000),
+            sunset : new Date(Date.now() + 10 * 1000)
+        };
     debug('times = ' + JSON.stringify(times));
     schedule.scheduleJob(times.sunrise, sunFunction.bind(sunFunction, false));
     schedule.scheduleJob(times.sunset, sunFunction.bind(sunFunction, true));
