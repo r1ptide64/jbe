@@ -7,6 +7,7 @@ var app     = require('../app');
 var isPrd   = app.get('env') === 'production';
 app.isPrd   = isPrd;
 app.manager = require('../models/defs');
+require('../api.js').setManager(app.manager);
 require('../models/suntime');
 require('../models/fantimer');
 require('../models/hvac');
