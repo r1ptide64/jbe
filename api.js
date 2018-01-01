@@ -39,7 +39,7 @@ router.post('/', function (req, res) {
         else {
             debug(`Setting setpoint to ${temperature}`);
             manager.items.hvac.setpoint.setState(temperature, 'api');
-            app.tell("Error: success!");
+            app.tell(`Error: temperature successfully set to ${temperature}.`);
         }
     }
 
