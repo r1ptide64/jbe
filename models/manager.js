@@ -2,42 +2,9 @@ var Item         = require('./item.js'),
     util         = require('util'),
     EventEmitter = require('events').EventEmitter,
     debug        = require('debug')('jbe:manager'),
-    mdns         = require('mdns'),
+    setupBrowser = require('./browser.js'),
     CastItem     = require('./castitem');
 
-var sequence = [
-    mdns.rst.DNSServiceResolve(),
-    'DNSServiceGetAddrInfo' in mdns.dns_sd
-        ? mdns.rst.DNSServiceGetAddrInfo()
-        : mdns.rst.getaddrinfo({
-        families: [4]
-    }),
-    mdns.rst.makeAddressesUnique()
-];
-
-function setupBrowser() {
-    try {
-        this.browser = mdns.createBrowser(mdns.tcp('googlecast'), {
-            resolverSequence: sequence
-        });
-        this.browser.on('serviceUp', (service) => {
-            this.addCastItem(service);
-        });
-        this.browser.once('error', onBrowserError.bind(this));
-        this.browser.start();
-    } catch (err) {
-        setTimeout(onBrowserError.bind(this, err), 5000);
-    }
-}
-
-function onBrowserError(err) {
-    debug('mdns browser encountered an error: ' + err);
-    if (this.browser instanceof EventEmitter) {
-        this.browser.removeAllListeners();
-    }
-    this.browser = null;
-    setupBrowser.call(this);
-}
 
 function Manager() {
     debug('creating Manager()');
@@ -46,6 +13,7 @@ function Manager() {
     EventEmitter.call(this);
     setupBrowser.call(this);
 }
+
 util.inherits(Manager, EventEmitter);
 
 
