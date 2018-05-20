@@ -11,7 +11,7 @@ function Manager() {
     this.items    = {};
     this.items.cc = {};
     EventEmitter.call(this);
-    browser.setupBrowser.call(this);
+    //browser.setupBrowser.call(this);
 }
 
 util.inherits(Manager, EventEmitter);
