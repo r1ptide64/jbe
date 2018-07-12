@@ -10,7 +10,7 @@
     <link rel="shortcut icon" href="/favicon/favicon.ico">
     <meta name="msapplication-config" content="/favicon/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
@@ -29,199 +29,209 @@
     <script src="ng-app.js"></script>
 </head>
 <body ng-app="joebApp">
-<div ng-controller="joebController">
-    <div layout="column" layout-fill>
-        <md-toolbar>
-            <div class="md-toolbar-tools">
-                <span>Gingiel-Bordon Basestar</span>
-
-                <!-- fill up the space between left and right area -->
-                <span flex></span>
-                <!-- 				<md-button> Right Bar Button </md-button> -->
-            </div>
-        </md-toolbar>
-    </div>
-    <md-content layout-xs="column" layout="row" layout-wrap layout-align-xs="start stretch"
-                layout-align="space-around start">
-        <md-card flex>
-            <md-card-title>
-                <md-card-title-text>
-                    <span class="md-headline">Climate</span>
-                </md-card-title-text>
-            </md-card-title>
-            <md-card-content layout="column">
-                <md-list flex>
-                    <md-list-item>
-                        <p>Temperature</p>
-                        <span class="md-secondary">
-                                {{items.hvac.temp.state}}&nbsp;&deg;F
-                            </span>
-                    </md-list-item>
-                    <md-list-item>
-                        <p>Humidity</p>
-                        <span class="md-secondary">
-                                {{items.hvac.humid.state}}%
-                            </span>
-                    </md-list-item>
-                    <md-divider></md-divider>
-                    <md-list-item>
-                        <p>Setpoint (home)</p>
-                        <md-select ng-model="items.hvac.setpoint.state" md-on-close="sendCommand(items.hvac.setpoint)">
-                            <md-option ng-value="setpoint" ng-repeat="setpoint in setpointAry">
-                                {{setpoint}}
-                            </md-option>
-                        </md-select>
-                    </md-list-item>
-                    <md-list-item>
-                        <p>Setpoint (away)</p>
-                        <md-select ng-model="items.hvac.awaySetpoint.state"
-                                   md-on-close="sendCommand(items.hvac.awaySetpoint)">
-                            <md-option ng-value="setpoint" ng-repeat="setpoint in setpointAry">
-                                {{setpoint}}
-                            </md-option>
-                        </md-select>
-                    </md-list-item>
-                    <md-list-item>
-                        <p>Mode</p>
-                        <md-radio-group layout="row" ng-model="items.hvac.mode.state"
-                                        ng-change="sendCommand(items.hvac.mode)">
-                            <md-radio-button ng-value=0>Off</md-radio-button>
-                            <md-radio-button ng-value=1>Heat</md-radio-button>
-                            <md-radio-button ng-value=2>AC</md-radio-button>
-                        </md-radio-group>
-                    </md-list-item>
-                    <md-list-item ng-click="toggleSwitch(items.hvac.comingHome)">
-                        <p>Coming Home</p>
-                        <md-switch class="md-secondary" ng-model="items.hvac.comingHome.state"
-                                   ng-change="sendCommand(items.hvac.comingHome)"></md-switch>
-                    </md-list-item>
-                    <md-list-item layout-align="center center">
-                        <p>Override</p>
-                        <md-button class="md-secondary md-raised" ng-click="pulseHvac(true)">Pulse On</md-button>
-                        <md-button class="md-secondary md-raised" ng-click="pulseHvac(false)">Pulse Off</md-button>
-                    </md-list-item>
-                </md-list>
-            </md-card-content>
-        </md-card>
-        <md-card flex>
-            <md-card-title>
-                <md-card-title-text>
-                    <span class="md-headline">Media</span>
-				</md-card-title-text>
-				
-            </md-card-title>
-            <md-card-content layout="column">
-			<span>License fees delinquent. Media disabled.</span>
-                <md-list flex>
-                    <div ng-repeat="castItem in items.cc">
-                        <md-divider ng-show="castItem.expanded"></md-divider>
-                        <md-list-item ng-click="toggleExpansion(castItem)" class="md-2-line">
-                            <!--class="{{ castItem.active ? 'md-3-line' : 'md-2-line' }}"-->
-                            <md-icon ng-style="castItem.active ? {color: '#8BC34A'} : {color: 'grey'}">
-                                {{ castIcon(castItem) }}
-                            </md-icon>
-                            <div class="md-list-item-text">
-                                <h3 class="md-subhead">{{castItem.name}}</h3>
-                                <p class="md-body-2">{{castItem.active ?
-                                    castItem.receiverStatus.applications[0].displayName : 'Inactive'}}</p>
-                            </div>
-                            <md-icon class="md-secondary">
-                                {{ castItem.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
-                            </md-icon>
-                        </md-list-item>
-                        <div ng-show="castItem.expanded" layout="column">
-                            <md-list-item ng-show="castItem.active" class="md-2-line" flex>
-                                <div class="md-list-item-text md-offset">
-                                    <h4>{{castItem.media.metadata.title}}</h4>
-                                </div>
-                            </md-list-item>
-                            <!--                            <div flex style="margin-left: 72px; margin-right: 16px" layout="row" layout-align="space-between start">
-                                                            <span>{{castCurrentTime(castItem)}}</span>
-                                                            <span>{{castDuration(castItem)}}</span>
-                                                        </div>-->
-                            <div flex layout="row">
-                                <md-button ng-show="castItem.active" class="md-icon-button">
-                                    <md-icon ng-click="castPlayPause(castItem)">
-                                        {{castItem.mediaStatus.playerState === 'PAUSED' ? 'play_arrow' : 'pause'}}
-                                    </md-icon>
-                                </md-button>
-                                <md-button class="md-icon-button">
-                                    <md-icon ng-click="toggleMute(castItem)">
-                                        {{castItem.receiverStatus.volume.muted ? 'volume_off' : 'volume_up'}}
-                                    </md-icon>
-                                </md-button>
-                                <md-slider-container flex>
-                                    <md-slider min="0" max="1" ng-model="castItem.receiverStatus.volume.level"
-                                               step="{{castItem.receiverStatus.volume.stepInterval}}"></md-slider>
-                                </md-slider-container>
-                            </div>
-                            <div flex layout="row" layout-align="end">
-                                <md-menu>
-                                    <md-button class="md-icon-button">
-                                        <md-icon ng-click="$mdOpenMenu($event)">cast</md-icon>
-                                    </md-button>
-                                    <md-menu-content>
-                                        <md-menu-item ng-repeat="media in customCastMedia">
-                                            <md-button ng-click="playCustomMedia(castItem, media)">
-                                                {{media.metadata.title}}
-                                            </md-button>
-                                        </md-menu-item>
-                                    </md-menu-content>
-                                </md-menu>
-                                <md-button ng-show="castItem.active" class="md-primary"
-                                           ng-click="stopCasting(castItem)">
-                                    stop
-                                </md-button>
-                            </div>
-                        </div>
-                        <md-divider ng-show="castItem.expanded"></md-divider>
-                    </div>
-                </md-list>
-            </md-card-content>
-        </md-card>
-        <div>
+    <div ng-controller="joebController">
+        <div layout="column" layout-fill>
+            <md-toolbar layout="row" layout-align="center center" class="md-toolbar md-warn" ng-show="ginbo">
+                <span>
+                    gingiel-bordon.win will expire on 7/15. Use <a href="https://ginbo.win">ginbo.win</a> instead.
+                </span>
+            </md-toolbar>
+            <md-toolbar>
+                <div class="md-toolbar-tools">
+                    <span>Gingiel-Bordon Basestar</span>
+                    <!-- fill up the space between left and right area -->
+                    <span flex></span>
+                    <!-- 				<md-button> Right Bar Button </md-button> -->
+                </div>
+            </md-toolbar>
+        </div>
+        <md-content layout-xs="column" layout="row" layout-wrap layout-align-xs="start stretch"
+                    layout-align="space-around start">
             <md-card flex>
                 <md-card-title>
                     <md-card-title-text>
-                        <span class="md-headline">Switches</span>
-                    </md-card-title-text>
-                </md-card-title>
-                <md-card-content layout="column">
-                    <md-list>
-                        <md-list-item ng-repeat="switch in items.switch" ng-click="toggleSwitch(switch)">
-                            <md-icon>lightbulb_outline</md-icon>
-                            <p>{{switch.name}}</p>
-                            <md-switch class="md-secondary" ng-model="switch.state"
-                                       ng-change="sendCommand(switch)"></md-switch>
-                        </md-list-item>
-                    </md-list>
-                </md-card-content>
-            </md-card>
-            <md-card flex>
-                <md-card-title>
-                    <md-card-title-text>
-                        <span class="md-headline">Presence</span>
+                        <span class="md-headline">Climate</span>
                     </md-card-title-text>
                 </md-card-title>
                 <md-card-content layout="column">
                     <md-list flex>
                         <md-list-item>
-                            <p>Josh</p>
+                            <p>Temperature</p>
                             <span class="md-secondary">
-                                {{items.presence.josh.state}}
+                                {{items.hvac.temp.state}}&nbsp;&deg;F
                             </span>
                         </md-list-item>
                         <md-list-item>
-                            <p>Chelsea</p>
+                            <p>Humidity</p>
                             <span class="md-secondary">
-                                {{items.presence.chelsea.state}}
+                                {{items.hvac.humid.state}}%
                             </span>
+                        </md-list-item>
+                        <md-divider></md-divider>
+                        <md-list-item>
+                            <p>Setpoint (home)</p>
+                            <md-select ng-model="items.hvac.setpoint.state" md-on-close="sendCommand(items.hvac.setpoint)">
+                                <md-option ng-value="setpoint" ng-repeat="setpoint in setpointAry">
+                                    {{setpoint}}
+                                </md-option>
+                            </md-select>
+                        </md-list-item>
+                        <md-list-item>
+                            <p>Setpoint (away)</p>
+                            <md-select ng-model="items.hvac.awaySetpoint.state"
+                                       md-on-close="sendCommand(items.hvac.awaySetpoint)">
+                                <md-option ng-value="setpoint" ng-repeat="setpoint in setpointAry">
+                                    {{setpoint}}
+                                </md-option>
+                            </md-select>
+                        </md-list-item>
+                        <md-list-item>
+                            <p>Mode</p>
+                            <md-radio-group layout="row" ng-model="items.hvac.mode.state"
+                                            ng-change="sendCommand(items.hvac.mode)">
+                                <md-radio-button ng-value=0>Off</md-radio-button>
+                                <md-radio-button ng-value=1>Heat</md-radio-button>
+                                <md-radio-button ng-value=2>AC</md-radio-button>
+                            </md-radio-group>
+                        </md-list-item>
+                        <md-list-item ng-click="toggleSwitch(items.hvac.comingHome)">
+                            <p>Coming Home</p>
+                            <md-switch class="md-secondary" ng-model="items.hvac.comingHome.state"
+                                       ng-change="sendCommand(items.hvac.comingHome)"></md-switch>
+                        </md-list-item>
+                        <md-list-item layout-align="center center">
+                            <p>Override</p>
+                            <md-button class="md-secondary md-raised" ng-click="pulseHvac(true)">Pulse On</md-button>
+                            <md-button class="md-secondary md-raised" ng-click="pulseHvac(false)">Pulse Off</md-button>
                         </md-list-item>
                     </md-list>
                 </md-card-content>
             </md-card>
-        </div>
-    </md-content>
-</div>
+            <md-card flex>
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">Media</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-content layout="column">
+                    <span>License fees delinquent. Media disabled.</span>
+                    <md-list flex>
+                        <div ng-repeat="castItem in items.cc">
+                            <md-divider ng-show="castItem.expanded"></md-divider>
+                            <md-list-item ng-click="toggleExpansion(castItem)" class="md-2-line">
+                                <!--class="{{ castItem.active ? 'md-3-line' : 'md-2-line' }}"-->
+                                "c
+                                ic
+                                <md-icon ng-style="castItem.active ? {color: '#8BC34A'} : {color: 'grey'}">
+                                    {{ castIcon(castItem) }}
+                                </md-icon>
+                                <div class="md-list-item-text">
+                                    <h3 class="md-subhead">{{castItem.name}}</h3>
+                                    <p class="md-body-2">
+                                        {{
+castItem.active ?
+                                    castItem.receiverStatus.applications[0].displayName : 'Inactive'
+                                        }}
+                                    </p>
+                                </div>
+                                <md-icon class="md-secondary">
+                                    {{ castItem.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+                                </md-icon>
+                            </md-list-item>
+                            <div ng-show="castItem.expanded" layout="column">
+                                <md-list-item ng-show="castItem.active" class="md-2-line" flex>
+                                    <div class="md-list-item-text md-offset">
+                                        <h4>{{castItem.media.metadata.title}}</h4>
+                                    </div>
+                                </md-list-item>
+                                <!--                            <div flex style="margin-left: 72px; margin-right: 16px" layout="row" layout-align="space-between start">
+                                                                <span>{{castCurrentTime(castItem)}}</span>
+                                                                <span>{{castDuration(castItem)}}</span>
+                                                            </div>-->
+                                v
+                                <div flex layout="row">
+                                    <md-button ng-show="castItem.active" class="md-icon-button">
+                                        <md-icon ng-click="castPlayPause(castItem)">
+                                            {{castItem.mediaStatus.playerState === 'PAUSED' ? 'play_arrow' : 'pause'}}
+                                        </md-icon>
+                                    </md-button>
+                                    <md-button class="md-icon-button">
+                                        <md-icon ng-click="toggleMute(castItem)">
+                                            {{castItem.receiverStatus.volume.muted ? 'volume_off' : 'volume_up'}}
+                                        </md-icon>
+                                    </md-button>
+                                    <md-slider-container flex>
+                                        <md-slider min="0" max="1" ng-model="castItem.receiverStatus.volume.level"
+                                                   step="{{castItem.receiverStatus.volume.stepInterval}}"></md-slider>
+                                    </md-slider-container>
+                                </div>
+                                <div flex layout="row" layout-align="end">
+                                    <md-menu>
+                                        <md-button class="md-icon-button">
+                                            <md-icon ng-click="$mdOpenMenu($event)">cast</md-icon>
+                                        </md-button>
+                                        <md-menu-content>
+                                            <md-menu-item ng-repeat="media in customCastMedia">
+                                                <md-button ng-click="playCustomMedia(castItem, media)">
+                                                    {{media.metadata.title}}
+                                                </md-button>
+                                            </md-menu-item>
+                                        </md-menu-content>
+                                    </md-menu>
+                                    <md-button ng-show="castItem.active" class="md-primary"
+                                               ng-click="stopCasting(castItem)">
+                                        stop
+                                    </md-button>
+                                </div>
+                            </div>
+                            <md-divider ng-show="castItem.expanded"></md-divider>
+                        </div>
+                    </md-list>
+                </md-card-content>
+            </md-card>
+            <div>
+                <md-card flex>
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">Switches</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content layout="column">
+                        <md-list>
+                            <md-list-item ng-repeat="switch in items.switch" ng-click="toggleSwitch(switch)">
+                                <md-icon>lightbulb_outline</md-icon>
+                                <p>{{switch.name}}</p>
+                                <md-switch class="md-secondary" ng-model="switch.state"
+                                           ng-change="sendCommand(switch)"></md-switch>
+                            </md-list-item>
+                        </md-list>
+                    </md-card-content>
+                </md-card>
+                <md-card flex>
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">Presence</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content layout="column">
+                        <md-list flex>
+                            <md-list-item>
+                                <p>Josh</p>
+                                <span class="md-secondary">
+                                    {{items.presence.josh.state}}
+                                </span>
+                            </md-list-item>
+                            <md-list-item>
+                                <p>Chelsea</p>
+                                <span class="md-secondary">
+                                    {{items.presence.chelsea.state}}
+                                </span>
+                            </md-list-item>
+                        </md-list>
+                    </md-card-content>
+                </md-card>
+            </div>
+        </md-content>
+    </div>
 </body>
 </html>
