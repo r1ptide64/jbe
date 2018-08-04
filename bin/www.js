@@ -3,17 +3,18 @@
 /**
  * Module dependencies.
  */
-var app     = require('../app');
-var isPrd   = app.get('env') === 'production';
-app.isPrd   = isPrd;
+var app = require('../app');
+var isPrd = app.get('env') === 'production';
+app.isPrd = isPrd;
 app.manager = require('../models/defs');
 require('../api.js').setManager(app.manager);
 require('../models/suntime');
 require('../models/fantimer');
 require('../models/hvac');
+require('../models/presence');
 var Socket = require('../models/socket');
-var debug  = require('debug')('jbe:server');
-var http   = require('http');
+var debug = require('debug')('jbe:server');
+var http = require('http');
 
 /**
  * Get port from environment and store in Express.
@@ -22,7 +23,7 @@ var http   = require('http');
 var portStr = isPrd
     ? '8008'
     : '3000';
-var port    = normalizePort(portStr);
+var port = normalizePort(portStr);
 app.set('port', port);
 
 /**
