@@ -1,18 +1,21 @@
-var app   = require('../app'),
+var app = require('../app'),
     debug = require('debug')('jbe:hvac');
+const fs = require('fs');
 
 var isPrd = app.isPrd;
-var hvac  = app.manager.items.hvac;
+var hvac = app.manager.items.hvac;
 
 const MIN_CYCLE_LENGTH = isPrd
     ? 5 * 60 * 1000
     : 20 * 1000;
-const TEMP_WINDOW      = 0.5;
+const TEMP_WINDOW = 0.5;
+
+const hxFl = fs.createWriteStream('mycoolfile', { flags: 'a' });
 
 var getCurrentSetpoint = function () {
-    var retVal     = hvac.setpoint;
+    var retVal = hvac.setpoint;
     var comingHome = hvac.comingHome;
-    var presence   = app.manager.items.presence;
+    var presence = app.manager.items.presence;
 
     if (!(comingHome && comingHome.state)) {
         if (presence !== undefined) {
@@ -22,7 +25,6 @@ var getCurrentSetpoint = function () {
                         retVal = hvac.awaySetpoint;
                     }
                 }
-
             }
         }
     }
@@ -36,18 +38,20 @@ var processTemperatureChange = function () {
     var setpoint = getCurrentSetpoint();
     var currTemp = hvac.temp.state;
     var currMode = hvac.mode.state;
-    var blowing  = hvac.blowing;
+    var blowing = hvac.blowing;
     if (setpoint === undefined || currTemp === undefined) {
         console.error('critical value undefined!');
         return;
     }
     var diff = currTemp - setpoint;
     debug('diff = ' + diff);
+    hxFl.write([Date.now(), currTemp, blowing.state].join(','));
     var desiredState = undefined;
     if (currMode === undefined || currMode === 0) {  // off/uninitiated
         debug('system off/uninitiated, done.');
         desiredState = false;
     }
+
     else if (Date.now() - blowing.lastChange >= MIN_CYCLE_LENGTH) {
         if (diff <= -TEMP_WINDOW) {
             debug('temp is low');
@@ -90,10 +94,10 @@ if (presence) {
 }
 
 hvac.blowing.on('update', function (newState) {
-    var debug    = require('debug')('jbe:blowing');
+    var debug = require('debug')('jbe:blowing');
     var currMode = hvac.mode.state;
-    var ac       = hvac.AC;
-    var heat     = hvac.heat;
+    var ac = hvac.AC;
+    var heat = hvac.heat;
     switch (currMode) {
         case 1:
             debug('heat mode, turning heat to ' + newState);
