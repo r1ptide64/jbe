@@ -1,6 +1,7 @@
 var app = require('../app'),
     debug = require('debug')('jbe:hvac');
 const fs = require('fs');
+const path = require('path');
 
 var isPrd = app.isPrd;
 var hvac = app.manager.items.hvac;
@@ -10,7 +11,7 @@ const MIN_CYCLE_LENGTH = isPrd
     : 20 * 1000;
 const TEMP_WINDOW = 0.5;
 
-const hxFl = fs.createWriteStream('mycoolfile', { flags: 'a' });
+const hxFl = fs.createWriteStream(path.join(__dirname, 'hvacHx.csv', { flags: 'a' });
 
 var getCurrentSetpoint = function () {
     var retVal = hvac.setpoint;
@@ -45,7 +46,8 @@ var processTemperatureChange = function () {
     }
     var diff = currTemp - setpoint;
     debug('diff = ' + diff);
-    hxFl.write([Date.now(), currTemp, blowing.state].join(','));
+    const nowStr = new Date().toLocaleString();
+    hxFl.write([nowStr, currTemp, blowing.state].join(','));
     var desiredState = undefined;
     if (currMode === undefined || currMode === 0) {  // off/uninitiated
         debug('system off/uninitiated, done.');
