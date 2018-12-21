@@ -11,7 +11,7 @@ const MIN_CYCLE_LENGTH = isPrd
     : 20 * 1000;
 const TEMP_WINDOW = 0.5;
 
-const hxFl = fs.createWriteStream(path.join(__dirname, 'hvacHx.csv'), { flags: 'a' });
+const hxFl = fs.createWriteStream(path.join(__dirname, '..', 'hvacHx.csv'), { flags: 'a' });
 
 var getCurrentSetpoint = function () {
     var retVal = hvac.setpoint;
