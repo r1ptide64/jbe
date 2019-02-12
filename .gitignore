@@ -5,3 +5,8 @@
 *.tmp
 *.vspx
 /.idea
+/bin
+/obj
+/NodejsApp1.njsproj
+/NodejsApp1.sln
+/hvacHx.csv

@@ -7,9 +7,9 @@ var isPrd = app.isPrd;
 var hvac = app.manager.items.hvac;
 
 const MIN_CYCLE_LENGTH = isPrd
-    ? 5 * 60 * 1000
+    ? 8 * 60 * 1000
     : 20 * 1000;
-const TEMP_WINDOW = 0.5;
+const TEMP_WINDOW = 0.1;
 
 const hxFl = fs.createWriteStream(path.join(__dirname, '..', 'hvacHx.csv'), { flags: 'a' });
 
