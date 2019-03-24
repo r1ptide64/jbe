@@ -11,7 +11,7 @@ var mqttRoot = app.isPrd
 
 definitions.insert([
     new Item('porchLight', 'Porch Light', 'switch', false, {
-        mqtt: new Maps.BackwardsSwitchMQTT(mqttRoot + '/porch-light/light/on'),
+        mqtt: new Maps.ForwardsSwitchMQTT(mqttRoot + '/porch-light/light/on'),
         db: true
     }),
     new Item('lfbrLight', 'Lower Bathroom Light', 'switch', false, {
